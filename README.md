@@ -25,7 +25,7 @@ Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` 
 
 ### Invoke Mutagen Cassandra at runtime
 
-At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. (It's easy to use Nu to get an instance by calling `$(CassandraMutagen.class)`. Note that the instance returned by Nu is client-managed, i.e. not a singleton.)
+At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. (It's easy to use Nu to get an instance by calling `$(CassandraMutagen.class)`. Note that the instance returned by [Nu](https://github.com/congainc/conga-nu) is client-managed, i.e. not a singleton.)
 
 Call `CassandraMutagen.initialize()` and provide the package name containing your mutations. You should see log messages listing all the resources that were found.
 
