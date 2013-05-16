@@ -1,6 +1,9 @@
 package com.toddfast.mutagen.cassandra.impl;
 
 import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.connectionpool.OperationResult;
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.cql.CqlStatementResult;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
@@ -77,7 +80,7 @@ public class CQLMutation extends AbstractCassandraMutation {
 			}
 			else {
 				statement
-					.append("\n")
+					.append(" ") // Replace \n with space
 					.append(line);
 			}
 
@@ -171,8 +174,28 @@ public class CQLMutation extends AbstractCassandraMutation {
 	protected void performMutation(Context context) {
 		context.debug("Executing mutation {}",state.getID());
 		for (String statement: statements) {
-			context.debug("Executing CQL statement \"{}\"",statement);
+			context.debug("Executing CQL \"{}\"",statement);
+
+			try {
+				OperationResult<CqlStatementResult> result=
+					getKeyspace().prepareCqlStatement()
+						.withCql(statement)
+						.execute();
+
+				context.info("Successfully executed CQL \"{}\" in {} attempts",
+					statement,result.getAttemptsCount());
+			}
+			catch (ConnectionException e) {
+				context.error("Exception executing CQL \"{}\"",statement,e);
+				throw new MutagenException("Exception executing CQL \""+
+					statement+"\"",e);
+			}
+			catch (RuntimeException e) {
+				context.error("Exception executing CQL \"{}\"",statement,e);
+				throw e;
+			}
 		}
+		context.debug("Done executing mutation {}",state.getID());
 	}
 
 

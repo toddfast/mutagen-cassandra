@@ -40,7 +40,9 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 
 		for (String resource: resources) {
 
-			if (resource.endsWith(".cql")) {
+			// Allow .sql files because some editors have syntax highlighting
+			// for SQL but not CQL
+			if (resource.endsWith(".cql") || resource.endsWith(".sql")) {
 				result.add(
 					new CQLMutation(keyspace,resource));
 			}

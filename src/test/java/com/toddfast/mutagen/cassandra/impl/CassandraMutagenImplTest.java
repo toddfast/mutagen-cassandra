@@ -16,7 +16,10 @@ import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
 import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
 import com.netflix.astyanax.ddl.SchemaChangeResult;
 import com.netflix.astyanax.impl.AstyanaxConfigurationImpl;
+import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.ConsistencyLevel;
+import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.State;
@@ -53,7 +56,7 @@ public class CassandraMutagenImplTest {
 				.setDefaultWriteConsistencyLevel(ConsistencyLevel.CL_QUORUM)
 			)
 			.withConnectionPoolConfiguration(
-				new ConnectionPoolConfigurationImpl("dotterBuilderPool")
+				new ConnectionPoolConfigurationImpl("testPool")
 				.setPort(9160)
 				.setMaxConnsPerHost(1)
 				.setSeeds("localhost")
@@ -138,6 +141,43 @@ public class CassandraMutagenImplTest {
 		assertEquals((state!=null ? state.getID() : (Integer)(-1)),(Integer)4);
 	}
 
+
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testData() throws Exception {
+
+		final ColumnFamily<String,String> CF_TEST1=
+			ColumnFamily.newColumnFamily("Test1",
+				StringSerializer.get(),StringSerializer.get());
+
+		ColumnList<String> columns;
+		columns=keyspace.prepareQuery(CF_TEST1)
+			.getKey("row1")
+			.execute()
+			.getResult();
+
+		assertEquals("foo",columns.getStringValue("value1",null));
+		assertEquals("bar",columns.getStringValue("value2",null));
+
+		columns=keyspace.prepareQuery(CF_TEST1)
+			.getKey("row2")
+			.execute()
+			.getResult();
+
+		assertEquals("chicken",columns.getStringValue("value1",null));
+		assertEquals("sneeze",columns.getStringValue("value2",null));
+
+		columns=keyspace.prepareQuery(CF_TEST1)
+			.getKey("row3")
+			.execute()
+			.getResult();
+
+		assertEquals("bar",columns.getStringValue("value1",null));
+		assertEquals("baz",columns.getStringValue("value2",null));
+	}
 	
 	
 	
