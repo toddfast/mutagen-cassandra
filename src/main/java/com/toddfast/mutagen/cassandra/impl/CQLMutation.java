@@ -36,9 +36,18 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 *
 	 *
 	 */
+	@Override
+	protected String getChangeSummary() {
+		return source;
+	}
+
+
+	/**
+	 *
+	 *
+	 */
 	private void loadCQLStatements(String resourceName) {
 
-		String source;
 		try {
 			source=loadResource(resourceName);
 		}
@@ -67,8 +76,9 @@ public class CQLMutation extends AbstractCassandraMutation {
 			else
 			if ((index=line.indexOf(";"))!=-1) {
 				// Split the line at the semicolon
-				statement.append(
-					line.substring(0,index+1));
+				statement
+					.append("\n")
+					.append(line.substring(0,index+1));
 				statements.add(statement.toString());
 				
 				if (line.length() > index+1) {
@@ -80,7 +90,7 @@ public class CQLMutation extends AbstractCassandraMutation {
 			}
 			else {
 				statement
-					.append(" ") // Replace \n with space
+					.append("\n")
 					.append(line);
 			}
 
@@ -205,6 +215,7 @@ public class CQLMutation extends AbstractCassandraMutation {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
+	private String source;
 	private State<Integer> state;
 	private List<String> statements=new ArrayList<String>();
 }

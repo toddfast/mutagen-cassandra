@@ -7,6 +7,7 @@ import com.netflix.astyanax.ddl.SchemaChangeResult;
 import com.netflix.astyanax.model.ColumnFamily;
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.query.RowQuery;
+import com.netflix.astyanax.serializers.ByteBufferSerializer;
 import com.netflix.astyanax.serializers.StringSerializer;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
@@ -111,7 +112,8 @@ public class CassandraSubject implements Subject<Integer> {
 		ColumnFamily.newColumnFamily(
 			"schema_version",
 			StringSerializer.get(),
-			StringSerializer.get());
+			StringSerializer.get(),
+			ByteBufferSerializer.get());
 	public static final String ROW_KEY="state";
 	public static final String VERSION_COLUMN="version";
 

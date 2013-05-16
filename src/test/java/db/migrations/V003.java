@@ -32,6 +32,17 @@ public class V003 extends AbstractCassandraMutation {
 	}
 
 
+
+	/**
+	 * Return a canonical representative of the change in string form
+	 *
+	 */
+	@Override
+	protected String getChangeSummary() {
+		return "update 'Test1' set value1='chicken', value2='sneeze' "+
+			"where key='row2';";
+	}
+
 	@Override
 	protected void performMutation(Context context) {
 		context.debug("Executing mutation {}",state.getID());

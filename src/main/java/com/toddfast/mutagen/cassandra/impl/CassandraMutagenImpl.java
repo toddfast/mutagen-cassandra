@@ -41,9 +41,16 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 					rootResourcePath,Pattern.compile(".*"),
 					getClass().getClassLoader());
 
+			// Make sure we found some resources
+			if (discoveredResources.isEmpty()) {
+				throw new IllegalArgumentException("Could not find resources "+
+					"on path \""+rootResourcePath+"\"");
+			}
+
 			Collections.sort(discoveredResources,COMPARATOR);
 
 			resources=new ArrayList<String>();
+
 			for (String resource: discoveredResources) {
 				System.out.println("Found mutation resource \""+resource+"\"");
 
@@ -79,18 +86,20 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 	 */
 	@Override
 	public Plan.Result<Integer> mutate(Keyspace keyspace) {
+		// Do this in a VM-wide critical section. External cluster-wide 
+		// synchronization is going to have to happen in the coordinator.
+		synchronized (System.class) {
+			CassandraCoordinator coordinator=new CassandraCoordinator(keyspace);
+			CassandraSubject subject=new CassandraSubject(keyspace);
 
-		CassandraCoordinator coordinator=new CassandraCoordinator(keyspace);
-		CassandraSubject subject=new CassandraSubject(keyspace);
+			Planner<Integer> planner=
+				new CassandraPlanner(keyspace,getResources());
+			Plan<Integer> plan=planner.getPlan(subject,coordinator);
 
-		List<Mutation<Integer>> mutations=new ArrayList<Mutation<Integer>>();
-		Planner<Integer> planner=new CassandraPlanner(keyspace,getResources());
-
-		Plan<Integer> plan=planner.getPlan(subject,coordinator);
-
-		// Execute the plan
-		Plan.Result<Integer> result=plan.execute();
-		return result;
+			// Execute the plan
+			Plan.Result<Integer> result=plan.execute();
+			return result;
+		}
 	}
 
 
@@ -108,20 +117,48 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 		new Comparator<String>() {
 			@Override
 			public int compare(String path1, String path2) {
+				final String origPath1=path1;
+				final String origPath2=path2;
 
-				int index1=path1.lastIndexOf("/");
-				int index2=path2.lastIndexOf("/");
+				try {
 
-				String file1=path1.substring(index1+1);
-				String file2=path2.substring(index2+1);
+					int index1=path1.lastIndexOf("/");
+					int index2=path2.lastIndexOf("/");
 
-				index1=file1.lastIndexOf(".");
-				index2=file2.lastIndexOf(".");
+					String file1;
+					if (index1!=-1) {
+						file1=path1.substring(index1+1);
+					}
+					else {
+						file1=path1;
+					}
 
-				file1=file1.substring(0,index1);
-				file2=file2.substring(0,index2);
+					String file2;
+					if (index2!=-1) {
+						file2=path2.substring(index2+1);
+					}
+					else {
+						file2=path2;
+					}
 
-				return file1.compareTo(file2);
+					index1=file1.lastIndexOf(".");
+					index2=file2.lastIndexOf(".");
+
+					if (index1 > 1) {
+						file1=file1.substring(0,index1);
+					}
+
+					if (index2 > 1) {
+						file2=file2.substring(0,index2);
+					}
+
+					return file1.compareTo(file2);
+				}
+				catch (StringIndexOutOfBoundsException e) {
+					throw new StringIndexOutOfBoundsException(e.getMessage()+
+						" (path1: \""+origPath1+
+						"\", path2: \""+origPath2+"\")");
+				}
 			}
 		};
 
