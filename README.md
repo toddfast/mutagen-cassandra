@@ -71,4 +71,4 @@ In practice, this means that you need to take the approach of "patching your way
 
 ### Examples
 
-For an example of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on default port (9160).
+For an example of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
