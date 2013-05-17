@@ -37,9 +37,13 @@ To perform the mutations, call `CassandraMutagen.mutate(Keyspace);` to update th
 
 As you continue development, continue adding mutation files to the mutations package and running Mutagen Cassandra during startup. There is no need to conditionalize running Mutagen, as its purpose is to check each time for new schema mutations and apply them.
 
+Examples
+--------
+
+For an example of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
 
 Other Details
-----------------------
+-------------
 
 ### The `schema_version` column family
 
@@ -68,7 +72,3 @@ The CQL version that you use is governed by the configuration of the Astyanax `K
 Mutagen Cassandra doesn't support undoing mutations. Once a mutant, always a mutant.
 
 In practice, this means that you need to take the approach of "patching your way to the future". If you made a change in a past mutation that you want to undo, create a new mutation to undo it. Never go back and change existing mutations, as they won't be applied, and worst case they will be applied to another schema instance and things will get horribly out of sync. You've bee warned.
-
-### Examples
-
-For an example of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
