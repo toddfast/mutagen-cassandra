@@ -55,7 +55,7 @@ Although it's best practice to always use Mutagen to mutate your schema, it's po
 
 However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
 
-It might instead make sense to create mutations reflecting the manual changes, but then manually update the `version` column in the `state` row of the `schema_version` column family to prevent those mutations from being applied. That way, if you ever recreate the schema, every change will be there.
+It might instead make sense to create mutations reflecting the manual changes, but then manually update the `version` column (it's an `int`)in the `state` row of the `schema_version` column family to prevent those mutations from being applied. That way, if you ever recreate the schema, every change will be there.
 
 ### CQL mutations
 
