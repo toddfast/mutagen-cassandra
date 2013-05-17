@@ -3,6 +3,10 @@ mutagen-cassandra
 
 Mutagen Cassandra is a framework (based on [Mutagen](https://github.com/toddfast/mutagen)) that provides schema versioning and mutation for Apache Cassandra.
 
+Mutagen is a lightweight framework for applying versioned changes (known as *mutations*) to a resource, in this case a Cassandra schema. Mutagen takes into account the resource's existing state and only applies changes that haven't yet been applied.
+
+Schema mutation with Mutagen helps you make manageable changes to the schema of live Cassandra instances as you update your software, and is especially useful when used across development, test, staging, and production environments to automatically keep schemas in sync.
+
 Getting Started
 ---------------
 
@@ -109,3 +113,13 @@ The CQL version that you use is governed by the configuration of the Astyanax `K
 Mutagen Cassandra doesn't support undoing mutations. Once a mutant, always a mutant.
 
 In practice, this means that you need to take the approach of "patching your way to the future". If you made a change in a past mutation that you want to undo, create a new mutation to undo it. Never go back and change existing mutations, as they won't be applied, and worst case they will be applied to another schema instance and things will get horribly out of sync. You've bee warned.
+
+### Clustered environments
+
+Recent versions of Cassandra handle schema changes in clustered deployments just fine, so no problems there.
+
+However, the current version of Mutagen Cassandra only provides VM-wide synchronization for mutations. This means that if you have multiple client nodes that embed Mutagen Cassandra, you will need to provide your own external coordination to ensure that only a single node is updating the schema with Mutagen at any given time.
+
+In practice, if you're already dealing with a clustered environment, this should be relatively straightforward. For example, you could use ZooKeeper, a file on an external Web server (or S3), Quartz, a queue with reservations, or something else that has reasonable semantics for coordinating multiple nodes. (If you are running a clustered environment and don't know what any of those mean, you probably have bigger fish to fry.)
+
+The proper way to do is for Mutagen Cassandra to handle this coordination via a cluster-aware `Coordinator` implementation (via Cassandra itself), but that is an upcoming feature and not ready yet.
