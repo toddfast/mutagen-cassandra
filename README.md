@@ -37,20 +37,21 @@ try {
 	// Get an Astyanax keyspace
 	Keyspace keyspace = ...
 
-	// Mutate!
+	// Mutate! Note, this method may not throw an exception.
 	Plan.Result<Integer> result = mutagen.mutate(keyspace);
 	
 	// Inspect result, especially for an exception
 	if (result.getException() != null) {
 		// Throw an exception
 	}
-	
+
+	// Did something else go wrong?
 	if (!result.isMutationComplete()) {
 		// Figure out what happened
 	}
 }
 catch (IOException e) {
-	// If the mutations weren't found
+	// Problem loading the mutations
 }
 catch (MutagenException e) {
 	// Mutation failed
@@ -61,9 +62,9 @@ At runtime (normally during app startup), get or create an instance of `Cassandr
 
 Call `CassandraMutagen.initialize()` and provide the package name containing your mutations. You should see log messages listing all the resources that were found.
 
-Obtain an Astyanax `Keyspace` instance. Mutagen Cassandra use the Netflix Astyanax Cassandra client, and requires a configured `Keyspace` instance to work. This should obviously be straightforward if you already use Astyanax. If not, please see [the documentation on the Astyanax wiki](https://github.com/Netflix/astyanax/wiki/Create-keyspace-or-column-family).
+Obtain an Astyanax `Keyspace` instance. Mutagen Cassandra use the Netflix Astyanax Cassandra client, and requires a configured `Keyspace` instance to work. This should obviously be straightforward if you already use Astyanax. If not, please see the [Keyspace documentation on the Astyanax wiki](https://github.com/Netflix/astyanax/wiki/Create-keyspace-or-column-family).
 
-To perform the mutations, call `CassandraMutagen.mutate(Keyspace);` to update the Cassandra schema to the latest version. Please note, **this method may not throw an exception if there is a problem.** Instead, use the returned value of type `Plan.Result<Integer>` to check for any exceptions thrown during the process. This may change in the future, so it would be prudent to surround your call to `mutate()` with a `try…catch` for `MutagenException`.
+To perform the mutations, call `CassandraMutagen.mutate(Keyspace);` to update the Cassandra schema to the latest version. Please note, **this method may not throw an exception if there is a problem.** Instead, use the returned value of type `Plan.Result<Integer>` to check for any exceptions thrown during the process. This may change in the future, so it would be prudent to surround your call to `mutate()` with a `try...catch` for `MutagenException`.
 
 ### 4. Continue adding mutations
 
