@@ -112,7 +112,7 @@ The CQL version that you use is governed by the configuration of the Astyanax `K
 
 Mutagen Cassandra doesn't support undoing mutations. Once a mutant, always a mutant.
 
-In practice, this means that you need to take the approach of "patching your way to the future". If you made a change in a past mutation that you want to undo, create a new mutation to undo it. Never go back and change existing mutations, as they won't be applied, and worst case they will be applied to another schema instance and things will get horribly out of sync. You've bee warned.
+In practice, this means that you need to take the approach of "patching your way to the future". If you made a change in a past mutation that you want to undo, create a new mutation to undo it. Never go back and change existing mutations, as they won't be applied, and worst case they will be applied to another schema instance and things will get horribly out of sync. You've been warned.
 
 ### Clustered environments
 
