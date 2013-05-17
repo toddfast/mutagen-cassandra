@@ -10,9 +10,11 @@ Getting Started
 
 Create a Java-style package in your project to contain versioned schema mutation files. The package name can be anything, but it should ideally be specific to the schema you will be mutating. (In the same way that Java packages prevent namespace collisions for classes, you don't want to accidentally mix someone else's mutations into your schema by using a common package name.)
 
-### 2. Add mutations
+### 2. Create mutations
 
-Add mutations. Mutations can be either declarative CQL2/3 or Java classes. In both cases, the root package name should be the same, and the mutation file name should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer, like `V001`.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
+Mutations can be either declarative CQL2/3 or Java classes that use whatever Cassandra client you like (Astyanax is supported directly).
+
+The root package name should be the same for both, and the mutation file names should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer, like `V001`.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
 
 Examples:
 
@@ -21,9 +23,9 @@ Examples:
 * `V003.cql`
 * `003.cql` (Note that this convention doesn't work for Java classes, so I recommend using a prefix that is compatible with Java identifier rules.)
 
-Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` files in separate source roots, but Mutagen will find them and order them properly as long as the version tags are consistent. 
+Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` files under separate source roots, but Mutagen will find them and order them properly as long as the version tags are consistent. 
 
-### 3. Invoke Mutagen Cassandra at runtime
+### 3. Mutate
 
 ````java
 try {
@@ -75,7 +77,7 @@ Examples
 
 For examples of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
 
-Note that the unit test mixes declarative CQL mutations with a Java mutation (`V003`), which are in different directories according to the standard Maven layout.
+Note that the unit test mixes declarative CQL mutations with a Java mutation (`V003`), which are in different directories according to the standard Maven layout but they get merged into the same directory in the build.
 
 Other Details
 -------------
