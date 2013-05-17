@@ -4,7 +4,7 @@ mutagen-cassandra
 Mutagen Cassandra is a framework (based on [Mutagen](https://github.com/toddfast/mutagen)) that provides schema versioning and mutation for Apache Cassandra.
 
 Getting Started
------------------------
+---------------
 
 ### 1. Create a package for mutations
 
@@ -36,3 +36,31 @@ To perform the mutations, call `CassandraMutagen.mutate(Keyspace);` to update th
 ### 4. Continue adding mutations
 
 As you continue development, continue adding mutation files to the mutations package and running Mutagen Cassandra during startup. There is no need to conditionalize running Mutagen, as its purpose is to check each time for new schema mutations and apply them.
+
+
+Other Details
+----------------------
+
+### The `schema_version` column family
+
+Mutagen Cassandra adds a column family to your keyspace called `schema_version` which tracks the current version of the schema. It doesn't otherwise change your keyspace in any way (like dropping and recreating it--whoops!), so it's possible to mix and match versioned and non-versioned column families in the same keyspace.
+
+### Using Mutagen with an existing schema
+
+Mutagen *mutates* schemas; it doesn't assume it owns them. If you already have a schema in Cassandra and want to start mutating it with Mutagen, you needn't do anything but use Mutagen as described above (starting with whatever version number you like). It will automatically create the `schema_version` column family and happily start applying mutations. Mutagen doesn't know or care semantically what the mutations it's applying are; just be sure that mutations targeting existing column familes *alter* them instead of creating them.
+
+### Manual changes to a schema
+
+Similarly, although it's best practice to alwyas use Mutagen to mutate your schema, it's possible to make manual modifications to your schema outside of Mutagen. As long as future mutations take these changes into account, Mutagen won't itself have a problem. However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
+
+### CQL mutations
+
+The easiest way to mutate your Cassandra schema is by using declarative CQL statements. Just be aware that Mutagen Cassandra treats all CQL statements in a single mutation file (separated by semicolons) as a single mutation.
+
+The CQL version that you use is governed by the configuration of the Astyanax `Keyspace` passed to `CassandraMutagen`. Make sure that you set the CQL version to match your statements.
+
+### Undoing mutations
+
+Mutagen Cassandra doesn't support undoing mutations. Once a mutant, always a mutant.
+
+In practice, this means that you need to take the approach of "patching your way to the future". If you made a change in a past mutation that you want to undo, create a new mutation to undo it. Never go back and change existing mutations, as they won't be applied, and worst case they will be applied to another schema instance and things will get horribly out of sync. You've bee warned.
