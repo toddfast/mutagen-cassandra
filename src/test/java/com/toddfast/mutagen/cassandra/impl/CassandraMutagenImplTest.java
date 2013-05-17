@@ -6,7 +6,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static com.conga.nu.Services.$;
 import com.google.common.collect.ImmutableMap;
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
@@ -23,6 +22,7 @@ import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.State;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,18 +113,37 @@ public class CassandraMutagenImplTest {
 
 
 	/**
-	 * Test of initialize method, of class CassandraMutagenImpl.
+	 * This is it!
+	 *
+	 */
+	private Plan.Result<Integer> mutate()
+			throws IOException {
+
+		// Get an instance of CassandraMutagen
+		// Using Nu: CassandraMutagen mutagen=$(CassandraMutagen.class);
+		CassandraMutagen mutagen=new CassandraMutagenImpl();
+
+		// Initialize the list of mutations
+		String rootResourcePath="cassandra/mutations";
+		mutagen.initialize(rootResourcePath);
+
+		// Mutate!
+		Plan.Result<Integer> result=mutagen.mutate(keyspace);
+
+		return result;
+	}
+
+
+	/**
+	 *
+	 *
 	 */
 	@Test
 	public void testInitialize() throws Exception {
 
-		CassandraMutagen mutagen=$(CassandraMutagen.class);
+		Plan.Result<Integer> result = mutate();
 
-		String rootResourcePath="db/migrations";
-		mutagen.initialize(rootResourcePath);
-
-		Plan.Result<Integer> result=mutagen.mutate(keyspace);
-
+		// Check the results
 		State<Integer> state=result.getLastState();
 
 		System.out.println("Mutation complete: "+result.isMutationComplete());
@@ -142,9 +161,9 @@ public class CassandraMutagenImplTest {
 	}
 
 
-
 	/**
-	 * 
+	 *
+	 *
 	 */
 	@Test
 	public void testData() throws Exception {

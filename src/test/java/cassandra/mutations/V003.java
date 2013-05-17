@@ -1,4 +1,4 @@
-package db.migrations;
+package cassandra.mutations;
 
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
