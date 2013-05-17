@@ -25,21 +25,36 @@ Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` 
 
 ### 3. Invoke Mutagen Cassandra at runtime
 
-In code:
-
 ````java
-// Get an instance of CassandraMutagen
-// Using Nu: CassandraMutagen mutagen=$(CassandraMutagen.class);
-CassandraMutagen mutagen = new CassandraMutagenImpl();
+try {
+	// Get an instance of CassandraMutagen
+	// Using Nu: CassandraMutagen mutagen = $(CassandraMutagen.class);
+	CassandraMutagen mutagen = new CassandraMutagenImpl();
 
-// Initialize the list of mutations
-mutagen.initialize("my/cassandra/mutations");
+	// Initialize the list of mutations
+	mutagen.initialize("my/cassandra/mutations");
 
-// Get an Astyanax keyspace
-Keyspace keyspace = ...
+	// Get an Astyanax keyspace
+	Keyspace keyspace = ...
 
-// Mutate!
-Plan.Result<Integer> result = mutagen.mutate(keyspace);
+	// Mutate!
+	Plan.Result<Integer> result = mutagen.mutate(keyspace);
+	
+	// Inspect result, especially for an exception
+	if (result.getException() != null) {
+		// Throw an exception
+	}
+	
+	if (!result.isMutationComplete()) {
+		// Figure out what happened
+	}
+}
+catch (IOException e) {
+	// If the mutations weren't found
+}
+catch (MutagenException e) {
+	// Mutation failed
+}
 ````
 
 At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. (It's easy to use [Nu](https://github.com/congainc/conga-nu) to get an instance by calling `$(CassandraMutagen.class)`. Note that the instance returned by Nu is client-managed, i.e. not a singleton, so be sure to hold onto it as long as you're using it.)
