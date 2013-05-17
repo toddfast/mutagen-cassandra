@@ -3,7 +3,7 @@ mutagen-cassandra
 
 Mutagen Cassandra is a framework (based on [Mutagen](https://github.com/toddfast/mutagen)) that provides schema versioning and mutation for Apache Cassandra.
 
-Using Mutagen Cassandra
+Getting Started
 -----------------------
 
 ### 1. Create a package for mutations
@@ -23,7 +23,7 @@ Examples:
 
 Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` files in separate source roots, but Mutagen will find them and order them properly as long as the version tags are consistent. 
 
-### Invoke Mutagen Cassandra at runtime
+### 3. Invoke Mutagen Cassandra at runtime
 
 At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. (It's easy to use Nu to get an instance by calling `$(CassandraMutagen.class)`. Note that the instance returned by [Nu](https://github.com/congainc/conga-nu) is client-managed, i.e. not a singleton.)
 
@@ -33,6 +33,6 @@ Obtain an Astyanax `Keyspace` instance. Mutagen Cassandra use the Netflix Astyan
 
 To perform the mutations, call `CassandraMutagen.mutate(Keyspace);` to update the Cassandra schema to the latest version. Please note, **this method may not throw an exception if there is a problem.** Instead, use the returned value of type `Plan.Result<Integer>` to check for any exceptions thrown during the process. This may change in the future, so it would be prudent to surround your call to `mutate()` with a `try…catch` for `MutagenException`.
 
-### Continue adding mutations
+### 4. Continue adding mutations
 
 As you continue development, continue adding mutation files to the mutations package and running Mutagen Cassandra during startup. There is no need to conditionalize running Mutagen, as its purpose is to check each time for new schema mutations and apply them.
