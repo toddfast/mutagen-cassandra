@@ -51,7 +51,7 @@ Mutagen *mutates* schemas; it doesn't assume it owns them. If you already have a
 
 ### Manual changes to a schema
 
-Similarly, although it's best practice to alwyas use Mutagen to mutate your schema, it's possible to make manual modifications to your schema outside of Mutagen. As long as future mutations take these changes into account, Mutagen won't itself have a problem. However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
+Similarly, although it's best practice to always use Mutagen to mutate your schema, it's possible to make manual modifications to your schema outside of Mutagen. As long as future mutations take these changes into account, Mutagen won't itself have a problem. However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
 
 ### CQL mutations
 
