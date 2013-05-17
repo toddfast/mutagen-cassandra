@@ -1,4 +1,4 @@
-package cassandra.mutations;
+package com.toddfast.mutagen.cassandra.test.mutations;
 
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;

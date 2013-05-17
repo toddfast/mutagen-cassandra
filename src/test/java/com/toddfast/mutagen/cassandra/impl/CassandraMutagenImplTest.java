@@ -124,7 +124,7 @@ public class CassandraMutagenImplTest {
 		CassandraMutagen mutagen=new CassandraMutagenImpl();
 
 		// Initialize the list of mutations
-		String rootResourcePath="cassandra/mutations";
+		String rootResourcePath="com/toddfast/mutagen/cassandra/test/mutations";
 		mutagen.initialize(rootResourcePath);
 
 		// Mutate!
