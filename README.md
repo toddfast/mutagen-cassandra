@@ -29,7 +29,7 @@ Examples:
 
 Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` files under separate source roots, but Mutagen will find them and order them properly as long as the version tags are consistent. 
 
-### 3. Mutate
+### 3. Mutate!
 
 ````java
 try {
