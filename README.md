@@ -12,7 +12,7 @@ Create a Java-style package in your project to contain versioned schema mutation
 
 ### 2. Add mutations
 
-Add mutations. Mutations can be either declarative CQL2/3 or Java classes. In both cases, the root mutation file name should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer, like `V001`.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
+Add mutations. Mutations can be either declarative CQL2/3 or Java classes. In both cases, the root package name should be the same, and the mutation file name should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer, like `V001`.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
 
 Examples:
 
@@ -36,7 +36,7 @@ CassandraMutagen mutagen = new CassandraMutagenImpl();
 mutagen.initialize("my/cassandra/mutations");
 
 // Get an Astyanax keyspace
-Keyspace keyspace = …
+Keyspace keyspace = ...
 
 // Mutate!
 Plan.Result<Integer> result = mutagen.mutate(keyspace);
@@ -57,7 +57,9 @@ As you continue development, continue adding mutation files to the mutations pac
 Examples
 --------
 
-For an example of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
+For examples of using Mutagen Cassandra, see the unit tests. To run the tests, you'll need a running instance of Cassandra running on the default port (9160).
+
+Note that the unit test mixes declarative CQL mutations with a Java mutation (`V003`), which are in different directories according to the standard Maven layout.
 
 Other Details
 -------------
