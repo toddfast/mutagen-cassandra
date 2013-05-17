@@ -51,13 +51,17 @@ Mutagen *mutates* schemas; it doesn't assume it owns them. If you already have a
 
 ### Manual changes to a schema
 
-Similarly, although it's best practice to always use Mutagen to mutate your schema, it's possible to make manual modifications to your schema outside of Mutagen. As long as future mutations take these changes into account, Mutagen won't itself have a problem. However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
+Although it's best practice to always use Mutagen to mutate your schema, it's possible to make manual modifications to your schema outside of Mutagen. As long as future mutations take these changes into account, Mutagen won't itself have a problem. This capability might come in useful during disaster recovery, for example.
+
+However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
+
+It might instead make sense to create mutations reflecting the manual changes, but then manually update the `version` column in the `state` row of the `schema_version` column family to prevent those mutations from being applied. That way, if you ever recreate the schema, every change will be there.
 
 ### CQL mutations
 
 The easiest way to mutate your Cassandra schema is by using declarative CQL statements. Just be aware that Mutagen Cassandra treats all CQL statements in a single mutation file (separated by semicolons) as a single mutation.
 
-The CQL version that you use is governed by the configuration of the Astyanax `Keyspace` passed to `CassandraMutagen`. Make sure that you set the CQL version to match your statements.
+The CQL version that you use is governed by the configuration of the Astyanax `Keyspace` passed to `CassandraMutagen`. Make sure that you set the CQL version to match the statements you'll be using.
 
 ### Undoing mutations
 
