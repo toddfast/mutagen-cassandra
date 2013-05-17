@@ -122,4 +122,4 @@ However, the current version of Mutagen Cassandra only provides VM-wide synchron
 
 In practice, if you're already dealing with a clustered environment, this should be relatively straightforward. For example, you could use ZooKeeper, a file on an external Web server (or S3), Quartz, a queue with reservations, or something else that has reasonable semantics for coordinating multiple nodes. (If you are running a clustered environment and don't know what any of those mean, you probably have bigger fish to fry.)
 
-The proper things is for Mutagen Cassandra to handle this coordination via a cluster-aware `Coordinator` implementation (ideally via Cassandra itself), but that is an upcoming feature and not ready yet.
+The proper thing is for Mutagen Cassandra to handle this coordination via a cluster-aware `Coordinator` implementation (ideally via Cassandra itself), but that is an upcoming feature and not ready yet.
