@@ -4,7 +4,7 @@
 
 	<groupId>com.toddfast.mutagen</groupId>
 	<artifactId>mutagen-cassandra</artifactId>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>toddfast-mutagen-cassandra</name>
@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>com.toddfast.mutagen</groupId>
 			<artifactId>mutagen</artifactId>
-			<version>0.1</version>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<!--
 		<dependency>
