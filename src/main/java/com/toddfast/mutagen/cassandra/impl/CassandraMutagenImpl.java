@@ -1,8 +1,8 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-import com.conga.nu.AllowField;
-import com.conga.nu.Scope;
-import com.conga.nu.ServiceProvider;
+//import com.conga.nu.AllowField;
+//import com.conga.nu.Scope;
+//import com.conga.nu.ServiceProvider;
 import com.netflix.astyanax.Keyspace;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * 
  * @author Todd Fast
  */
-@ServiceProvider(scope=Scope.CLIENT_MANAGED)
+//@ServiceProvider(scope=Scope.CLIENT_MANAGED)
 public class CassandraMutagenImpl implements CassandraMutagen {
 
 	/**
@@ -162,6 +162,6 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 			}
 		};
 
-	@AllowField
+//	@AllowField
 	private List<String> resources;
 }
