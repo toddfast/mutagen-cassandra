@@ -33,9 +33,8 @@ Lastly, note that if you use Maven, you'll need to put `.cql` files and `.java` 
 
 ````java
 try {
-	// Get an instance of CassandraMutagen
-	// Using Nu: CassandraMutagen mutagen = $(CassandraMutagen.class);
-	CassandraMutagen mutagen = new CassandraMutagenImpl();
+	// Get an instance of CassandraMutagen somehow (ideally inject it)
+	CassandraMutagen mutagen = ... // e.g. new CassandraMutagenImpl();
 
 	// Initialize the list of mutations
 	mutagen.initialize("my/cassandra/mutations");
@@ -64,7 +63,7 @@ catch (MutagenException e) {
 }
 ````
 
-At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. (It's easy to use [Nu](https://github.com/congainc/conga-nu) to get an instance by calling `$(CassandraMutagen.class)`. Note that the instance returned by Nu is client-managed, i.e. not a singleton, so be sure to hold onto it as long as you're using it.)
+At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. You can use Nu, Guice, or another dependency injection framework, or if you really want, you can create an instance the old fashioned way: `new CassandraMutageImpl()`.
 
 Call `CassandraMutagen.initialize()` and provide the package name containing your mutations. You should see log messages listing all the resources that were found.
 
