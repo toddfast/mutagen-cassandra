@@ -58,11 +58,14 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 					// Remove the file path
 					resource=resource.substring(
 						resource.indexOf(rootResourcePath));
-				}
+					if (resource.contains("$")) {
+						// skip inner classes
+						continue;
+					}
+                }
 
 				resources.add(resource);
 			}
-
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Could not find resources on "+
