@@ -9,7 +9,7 @@
 
 	<groupId>com.toddfast.mutagen</groupId>
 	<artifactId>mutagen-cassandra</artifactId>
-	<version>0.3</version>
+	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>toddfast-mutagen-cassandra</name>
