@@ -6,7 +6,7 @@
 		<version>7</version>
 	</parent>
 
-	<groupId>com.toddfast.mutagen</groupId>
+	<groupId>org.restlet</groupId>
 	<artifactId>mutagen-cassandra</artifactId>
 	<version>0.4.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -17,11 +17,11 @@
 		provides CQL schema versioning and mutation for Apache Cassandra.
 	</description>
 
-	<url>https://github.com/toddfast/mutagen-cassandra</url>
+	<url>https://github.com/restlet/mutagen-cassandra</url>
 	<scm>
-		<url>https://github.com/toddfast/mutagen-cassandra</url>
-		<connection>scm:git:git@github.com:toddfast/mutagen-cassandra.git</connection>
-		<developerConnection>scm:git:git@github.com:toddfast/mutagen-cassandra.git</developerConnection>
+		<url>https://github.com/restlet/mutagen-cassandra</url>
+		<connection>scm:git:git@github.com:restlet/mutagen-cassandra.git</connection>
+		<developerConnection>scm:git:git@github.com:restlet/mutagen-cassandra.git</developerConnection>
 	</scm>
 
 	<licenses>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>com.toddfast.mutagen</groupId>
 			<artifactId>mutagen</artifactId>
-			<version>0.3.1-SNAPSHOT</version>
+			<version>0.3.0</version>
 		</dependency>
 		<!--
 		<dependency>
@@ -69,4 +69,18 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+		 <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <!-- or whatever version you use -->
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
