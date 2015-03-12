@@ -70,11 +70,12 @@
 		</dependency>
 	</dependencies>
 	
-		 <build>
-    <plugins>
+	<build>
+     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.2</version>
         <configuration>
           <!-- or whatever version you use -->
           <source>1.7</source>
