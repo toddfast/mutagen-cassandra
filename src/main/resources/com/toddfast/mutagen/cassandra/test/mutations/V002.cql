@@ -1,2 +1,2 @@
-alter columnfamily 'Test1'
-	add 'value2' varchar;
+alter columnfamily "Test1"
+	add value2 varchar;

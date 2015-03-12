@@ -39,7 +39,7 @@ public class V003 extends AbstractCassandraMutation {
 	 */
 	@Override
 	protected String getChangeSummary() {
-		return "update 'Test1' set value1='chicken', value2='sneeze' "+
+		return "update \"Test1\" set value1='chicken', value2='sneeze' "+
 			"where key='row2';";
 	}
 
