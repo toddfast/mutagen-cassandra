@@ -26,8 +26,8 @@ import static org.junit.Assert.*;
 public class CassandraMutagenImplTest {
 
 	public CassandraMutagenImplTest() {
-		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		this.session = cluster.connect(keyspace);
+		cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		session = cluster.connect(keyspace);
 	}
 
 
@@ -39,26 +39,7 @@ public class CassandraMutagenImplTest {
 	}
 
 	private static void defineKeyspace() {
-		context=new AstyanaxContext.Builder()
-			.forKeyspace("mutagen_test")
-			.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-//					.setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
-//					.setCqlVersion("3.0.0")
-//					.setTargetCassandraVersion("1.2")
-				.setDefaultReadConsistencyLevel(ConsistencyLevel.CL_QUORUM)
-				.setDefaultWriteConsistencyLevel(ConsistencyLevel.CL_QUORUM)
-			)
-			.withConnectionPoolConfiguration(
-				new ConnectionPoolConfigurationImpl("testPool")
-				.setPort(9160)
-				.setMaxConnsPerHost(1)
-				.setSeeds("localhost")
-			)
-			.withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
-			.buildKeyspace(ThriftFamilyFactory.getInstance());
-
-		context.start();
-		keyspace=context.getClient();
+		
 	}
 
 	private static void createKeyspace(){
@@ -186,6 +167,6 @@ public class CassandraMutagenImplTest {
 	////////////////////////////////////////////////////////////////////////////
 
 	private static String keyspace;
-	private Cluster cluster;
-	private Session session;
+	private static Cluster cluster;
+	private static Session session;
 }

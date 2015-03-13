@@ -1,5 +1,7 @@
 package com.toddfast.mutagen.cassandra.impl;
 
+import com.datastax.driver.core.Session;
+
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
@@ -23,8 +25,8 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	protected CassandraPlanner(String keyspace, 
-			List<String> mutationResources) {
-		super(loadMutations(keyspace,mutationResources),null);
+			List<String> mutationResources,Session session) {
+		super(loadMutations(keyspace,mutationResources,session),null);
 	}
 
 
@@ -33,7 +35,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static List<Mutation<Integer>> loadMutations(
-			String keyspace, Collection<String> resources) {
+			String keyspace, Collection<String> resources,Session session) {
 
 		List<Mutation<Integer>> result=new ArrayList<Mutation<Integer>>();
 
@@ -43,7 +45,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			// for SQL but not CQL
 			if (resource.endsWith(".cql") || resource.endsWith(".sql")) {
 				result.add(
-					new CQLMutation(keyspace,resource));
+					new CQLMutation(keyspace,resource,session));
 			}
 			else
 			if (resource.endsWith(".class")) {
@@ -151,4 +153,6 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Coordinator<Integer> coordinator) {
 		return super.getPlan(subject,coordinator);
 	}
+	
+	private Session session;
 }

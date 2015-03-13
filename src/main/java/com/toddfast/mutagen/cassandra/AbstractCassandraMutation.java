@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.PreparedStatement;
 
@@ -24,12 +23,11 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	/**
 	 *
 	 */
-	protected AbstractCassandraMutation(String keyspace) {
+	protected AbstractCassandraMutation(String keyspace,Session session) {
 		super();
 		this.keyspace=keyspace;
 		//get session
-		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		this.session = cluster.connect(keyspace);
+		this.session = session;
 	}
 
 
@@ -289,7 +287,6 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	private String cqlMigrationSeparator = "_";  //script separator
 	private String keyspace;   //keyspace
 	
-	private Cluster cluster;   //cluster
 	private Session session;   //session
 	
 	private String versionSchemaTable = "Version";

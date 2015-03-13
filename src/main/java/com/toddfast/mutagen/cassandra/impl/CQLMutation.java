@@ -27,10 +27,8 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 * 
 	 * 
 	 */
-	public CQLMutation(String keyspace, String resourceName) {
-		super(keyspace);
-		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		this.session = cluster.connect(keyspace);
+	public CQLMutation(String keyspace, String resourceName,Session session) {
+		super(keyspace,session);
 
 		state=super.parseVersion(resourceName);
 		this.ressource = resourceName.substring(resourceName
@@ -225,6 +223,5 @@ public class CQLMutation extends AbstractCassandraMutation {
 	private State<Integer> state;
 	private List<String> statements=new ArrayList<String>();
 	
-	private Cluster cluster;
 	private Session session;
 }

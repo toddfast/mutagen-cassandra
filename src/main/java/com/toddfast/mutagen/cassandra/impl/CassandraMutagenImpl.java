@@ -1,5 +1,8 @@
 package com.toddfast.mutagen.cassandra.impl;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.Planner;
@@ -23,7 +26,7 @@ import java.util.regex.Pattern;
  */
 //@ServiceProvider(scope=Scope.CLIENT_MANAGED)
 public class CassandraMutagenImpl implements CassandraMutagen {
-
+	
 	/**
 	 * 
 	 * 
@@ -89,15 +92,22 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 		// Do this in a VM-wide critical section. External cluster-wide 
 		// synchronization is going to have to happen in the coordinator.
 		synchronized (System.class) {
+			cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+			session = cluster.connect(keyspace);
+			
 			CassandraCoordinator coordinator=new CassandraCoordinator(keyspace);
-			CassandraSubject subject=new CassandraSubject(keyspace);
+			CassandraSubject subject=new CassandraSubject(keyspace,session);
 
 			Planner<Integer> planner=
-				new CassandraPlanner(keyspace,getResources());
+				new CassandraPlanner(keyspace,getResources(),session);
 			Plan<Integer> plan=planner.getPlan(subject,coordinator);
 
 			// Execute the plan
 			Plan.Result<Integer> result=plan.execute();
+			//close session and cluster
+			session.close();
+			cluster.close();
+			
 			return result;
 		}
 	}
@@ -164,4 +174,8 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 
 //	@AllowField
 	private List<String> resources;
+	
+	private String keyspace;
+	private Cluster cluster;
+	private Session session;
 }

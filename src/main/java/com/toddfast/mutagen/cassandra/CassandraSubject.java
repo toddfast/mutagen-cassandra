@@ -1,6 +1,5 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -22,7 +21,7 @@ public class CassandraSubject implements Subject<Integer> {
 	 *
 	 *
 	 */
-	public CassandraSubject(String keyspace) {
+	public CassandraSubject(String keyspace,Session session) {
 		super();
 		if (keyspace==null) {
 			throw new IllegalArgumentException(
@@ -30,8 +29,7 @@ public class CassandraSubject implements Subject<Integer> {
 		}
 
 		this.keyspace=keyspace;
-		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		this.session = cluster.connect(keyspace);
+		this.session = session;
 	}
 
 
@@ -121,7 +119,6 @@ public class CassandraSubject implements Subject<Integer> {
 //	public static final String VERSION_COLUMN="version";
 
 	private String keyspace;   //keyspace
-	private Cluster cluster;   //cluster
 	private Session session;   //session
 	
 	private String versionSchemaTable = "Version";
