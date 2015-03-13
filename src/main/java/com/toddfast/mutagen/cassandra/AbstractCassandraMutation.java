@@ -1,29 +1,35 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.MutationBatch;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.PreparedStatement;
+
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.basic.SimpleState;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 
 /**
  *
  * @author Todd Fast
  */
 public abstract class AbstractCassandraMutation implements Mutation<Integer> {
-
 	/**
 	 *
-	 *
 	 */
-	protected AbstractCassandraMutation(Keyspace keyspace) {
+	protected AbstractCassandraMutation(String keyspace) {
 		super();
 		this.keyspace=keyspace;
+		//get session
+		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		this.session = cluster.connect(keyspace);
 	}
 
 
@@ -48,12 +54,12 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 */
 	protected final State<Integer> parseVersion(String resourceName) {
 		String versionString=resourceName;
-		int index=versionString.lastIndexOf("/");
+		int index=versionString.lastIndexOf(fileSeparator);
 		if (index!=-1) {
 			versionString=versionString.substring(index+1);
 		}
 
-		index=versionString.lastIndexOf(".");
+		index=versionString.lastIndexOf(cqlMigrationSeparator);
 		if (index!=-1) {
 			versionString=versionString.substring(0,index);
 		}
@@ -83,7 +89,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 *
 	 *
 	 */
-	protected Keyspace getKeyspace() {
+	protected String getKeyspace() {
 		return keyspace;
 	}
 
@@ -109,7 +115,24 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 */
 	protected abstract String getChangeSummary();
 
-
+	/**
+	 * get the ressource name
+	 */
+	protected abstract String getRessourceName();
+	
+	/**
+	 * append the version record
+	 */
+	protected void appendVersionRecord(int version,String filename){
+		//insert version record
+		String insertStatement = "INSERT INTO" + "\"" + versionSchemaTable + "\"" + "(id,filename,\"timestamp\") VALUES(?,?,?)";
+		PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
+		session.execute(preparedInsertStatement.bind(version, 
+													filename, 
+													new Timestamp(new Date().getTime())
+													));
+		}
+	
 	/**
 	 * Performs the actual mutation and then updates the recorded schema version
 	 *
@@ -130,28 +153,9 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 
 		String changeHash=md5String(change);
 
-		// The straightforward way, without locking
-		try {
-			MutationBatch batch=getKeyspace().prepareMutationBatch();
-			batch
-				.withRow(CassandraSubject.VERSION_CF,
-					CassandraSubject.ROW_KEY)
-				.putColumn(CassandraSubject.VERSION_COLUMN,version);
-
-			batch
-				.withRow(CassandraSubject.VERSION_CF,
-					String.format("%08d",version))
-				.putColumn("change",change)
-				.putColumn("hash",changeHash);
-
-			batch.execute();
-		}
-		catch (ConnectionException e) {
-			throw new MutagenException("Could not update \"schema_version\" "+
-				"column family to state "+version+
-				"; schema is now out of sync with recorded version",e);
-		}
-
+		// append version record
+		appendVersionRecord(version,getRessourceName());
+		
 // TAF: Why does this fail with a StaleLockException? Do we need to use a
 // separate lock table?
 
@@ -281,5 +285,13 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
-	private Keyspace keyspace;
+	private String fileSeparator = "/";		//file separator
+	private String cqlMigrationSeparator = "_";  //script separator
+	private String keyspace;   //keyspace
+	
+	private Cluster cluster;   //cluster
+	private Session session;   //session
+	
+	private String versionSchemaTable = "Version";
+
 }
