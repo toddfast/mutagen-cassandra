@@ -90,7 +90,9 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	protected String getKeyspace() {
 		return keyspace;
 	}
-
+	protected Session getSession(){
+		return session;
+	}
 
 	/**
 	 * Perform the actual mutation
@@ -123,9 +125,10 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 */
 	protected void appendVersionRecord(int version,String filename){
 		//insert version record
-		String insertStatement = "INSERT INTO" + "\"" + versionSchemaTable + "\"" + "(id,filename,\"timestamp\") VALUES(?,?,?)";
+		String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (id,filename,timestamp) VALUES (?,?,?);";
+		
 		PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
-		session.execute(preparedInsertStatement.bind(version, 
+		session.execute(preparedInsertStatement.bind(new Long(version), 
 													filename, 
 													new Timestamp(new Date().getTime())
 													));
@@ -141,9 +144,10 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 
 		// Perform the mutation
 		performMutation(context);
-
 		int version=getResultingState().getID();
-
+		
+		System.out.println(version);
+		
 		String change=getChangeSummary();
 		if (change==null) {
 			change="";

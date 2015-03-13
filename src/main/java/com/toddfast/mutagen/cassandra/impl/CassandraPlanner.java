@@ -1,13 +1,13 @@
 package com.toddfast.mutagen.cassandra.impl;
 
 import com.datastax.driver.core.Session;
-
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.Subject;
 import com.toddfast.mutagen.basic.BasicPlanner;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	protected CassandraPlanner(String keyspace, 
 			List<String> mutationResources,Session session) {
 		super(loadMutations(keyspace,mutationResources,session),null);
+		this.session = session;
 	}
 
 
@@ -36,11 +37,9 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 */
 	private static List<Mutation<Integer>> loadMutations(
 			String keyspace, Collection<String> resources,Session session) {
-
 		List<Mutation<Integer>> result=new ArrayList<Mutation<Integer>>();
 
 		for (String resource: resources) {
-
 			// Allow .sql files because some editors have syntax highlighting
 			// for SQL but not CQL
 			if (resource.endsWith(".cql") || resource.endsWith(".sql")) {
@@ -50,14 +49,14 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			else
 			if (resource.endsWith(".class")) {
 				result.add(
-					loadMutationClass(keyspace,resource));
+					loadMutationClass(keyspace,resource,session));
 			}
 			else {
 				throw new IllegalArgumentException("Unknown type for "+
 					"mutation resource \""+resource+"\"");
 			}
 		}
-
+		
 		return result;
 	}
 
@@ -67,7 +66,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static Mutation<Integer> loadMutationClass(
-			String keyspace, String resource) {
+			String keyspace, String resource, Session session) {
 
 		assert resource.endsWith(".class"):
 			"Class resource name \""+resource+"\" should end with .class";
@@ -91,9 +90,9 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Constructor<?> constructor;
 			Mutation<Integer> mutation=null;
 			try {
-				// Try a constructor taking a keyspace
-				constructor=clazz.getConstructor(String.class);
-				mutation=(Mutation<Integer>)constructor.newInstance(keyspace);
+				// Try a constructor taking a keyspace and a session
+				constructor=clazz.getConstructor(String.class,Session.class);
+				mutation=(Mutation<Integer>)constructor.newInstance(keyspace,session);
 			}
 			catch (NoSuchMethodException e) {
 				// Wrong assumption

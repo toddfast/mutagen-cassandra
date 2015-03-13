@@ -91,22 +91,24 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 	public Plan.Result<Integer> mutate(String keyspace) {
 		// Do this in a VM-wide critical section. External cluster-wide 
 		// synchronization is going to have to happen in the coordinator.
+		
+		
 		synchronized (System.class) {
 			cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
 			session = cluster.connect(keyspace);
 			
 			CassandraCoordinator coordinator=new CassandraCoordinator(keyspace);
 			CassandraSubject subject=new CassandraSubject(keyspace,session);
-
+			
 			Planner<Integer> planner=
 				new CassandraPlanner(keyspace,getResources(),session);
 			Plan<Integer> plan=planner.getPlan(subject,coordinator);
-
+			
 			// Execute the plan
 			Plan.Result<Integer> result=plan.execute();
 			//close session and cluster
-			session.close();
-			cluster.close();
+//			session.close();
+//			cluster.close();
 			
 			return result;
 		}

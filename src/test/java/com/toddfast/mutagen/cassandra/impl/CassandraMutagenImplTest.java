@@ -1,22 +1,28 @@
 package com.toddfast.mutagen.cassandra.impl;
 
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import com.google.common.collect.ImmutableMap;
-
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
-
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.State;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import static org.junit.Assert.*;
 
 /**
@@ -25,21 +31,11 @@ import static org.junit.Assert.*;
  */
 public class CassandraMutagenImplTest {
 
-	public CassandraMutagenImplTest() {
-		cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		session = cluster.connect(keyspace);
-	}
-
-
 	@BeforeClass
 	public static void setUpClass()
 			throws Exception {
-		defineKeyspace();
-		createKeyspace();
-	}
-
-	private static void defineKeyspace() {
-		
+		cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		session = cluster.connect(keyspace);
 	}
 
 	private static void createKeyspace(){
@@ -49,7 +45,7 @@ public class CassandraMutagenImplTest {
 		int keyspaceReplicationFactor=1;
 		String keyspaceStrategyClass="SimpleStrategy";
 		
-		session.execute("CREATE KEYSPACE " + keyspace + "WITH REPLICATION"
+		session.execute("CREATE KEYSPACE " + keyspace + " WITH REPLICATION "
 				+ "= {'class':"+
 				keyspaceStrategyClass+"', 'replication_factor':"+keyspaceReplicationFactor+"};");
 		System.out.println("Created keyspace "+keyspace);
@@ -59,8 +55,8 @@ public class CassandraMutagenImplTest {
 	@AfterClass
 	public static void tearDownClass()
 			throws Exception {
-		OperationResult<SchemaChangeResult> result=keyspace.dropKeyspace();
-		System.out.println("Dropped keyspace "+keyspace);
+//		ResultSet result=session.execute("DROP KEYSPACE" + keyspace);
+//		System.out.println("Dropped keyspace "+keyspace);
 	}
 
 
@@ -102,7 +98,7 @@ public class CassandraMutagenImplTest {
 	 */
 	@Test
 	public void testInitialize() throws Exception {
-
+		
 		Plan.Result<Integer> result = mutate();
 
 		// Check the results
@@ -127,37 +123,31 @@ public class CassandraMutagenImplTest {
 	 *
 	 *
 	 */
+	public ResultSet query(Object... values){
+		String columnFamily = "Test1";
+		//query
+		String selectStatement = "SELECT * FROM \"" + columnFamily + "\" " + "WHERE key=?";
+		PreparedStatement preparedSelectStatement = session.prepare(selectStatement);
+		BoundStatement boundSelectStatement = preparedSelectStatement.bind(values);
+		return session.execute(boundSelectStatement);
+	}
 	@Test
 	public void testData() throws Exception {
+		ResultSet results1 = query("row1");
+		Row row1 = results1.one();
+		assertEquals("foo",row1.getString("value1"));
+		assertEquals("bar",row1.getString("value2"));
+		
+		ResultSet results2 = query("row2");
+		Row row2 = results2.one();
+		assertEquals("chicken",row2.getString("value1"));
+		assertEquals("sneeze",row2.getString("value2"));
 
-		final ColumnFamily<String,String> CF_TEST1=
-			ColumnFamily.newColumnFamily("Test1",
-				StringSerializer.get(),StringSerializer.get());
+		ResultSet results3 = query("row3");
+		Row row3 = results3.one();
 
-		ColumnList<String> columns;
-		columns=keyspace.prepareQuery(CF_TEST1)
-			.getKey("row1")
-			.execute()
-			.getResult();
-
-		assertEquals("foo",columns.getStringValue("value1",null));
-		assertEquals("bar",columns.getStringValue("value2",null));
-
-		columns=keyspace.prepareQuery(CF_TEST1)
-			.getKey("row2")
-			.execute()
-			.getResult();
-
-		assertEquals("chicken",columns.getStringValue("value1",null));
-		assertEquals("sneeze",columns.getStringValue("value2",null));
-
-		columns=keyspace.prepareQuery(CF_TEST1)
-			.getKey("row3")
-			.execute()
-			.getResult();
-
-		assertEquals("bar",columns.getStringValue("value1",null));
-		assertEquals("baz",columns.getStringValue("value2",null));
+		assertEquals("bar",row3.getString("value1"));
+		assertEquals("baz",row3.getString("value2"));
 	}
 	
 	
@@ -166,7 +156,7 @@ public class CassandraMutagenImplTest {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
-	private static String keyspace;
+	private static String keyspace = "apispark";
 	private static Cluster cluster;
 	private static Session session;
 }

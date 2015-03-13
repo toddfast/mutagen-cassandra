@@ -28,7 +28,7 @@ public class CassandraSubject implements Subject<Integer> {
 				"Parameter \"keyspace\" cannot be null");
 		}
 
-		this.keyspace=keyspace;
+		this.keyspace = keyspace;
 		this.session = session;
 	}
 

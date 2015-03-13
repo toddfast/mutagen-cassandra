@@ -1,10 +1,7 @@
 package com.toddfast.mutagen.cassandra.test.mutations;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.MutationBatch;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.model.ColumnFamily;
-import com.netflix.astyanax.serializers.StringSerializer;
+import com.datastax.driver.core.Session;
+
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.basic.SimpleState;
@@ -20,8 +17,8 @@ public class V003 extends AbstractCassandraMutation {
 	 *
 	 *
 	 */
-	public V003(String keyspace) {
-		super(keyspace);
+	public V003(String keyspace,Session session) {
+		super(keyspace,session);
 		state=new SimpleState<Integer>(3);
 	}
 
@@ -46,26 +43,20 @@ public class V003 extends AbstractCassandraMutation {
 	@Override
 	protected void performMutation(Context context) {
 		context.debug("Executing mutation {}",state.getID());
-		final ColumnFamily<String,String> CF_TEST1=
-			ColumnFamily.newColumnFamily("Test1",
-				StringSerializer.get(),StringSerializer.get());
-
-		MutationBatch batch=getKeyspace().prepareMutationBatch();
-		batch.withRow(CF_TEST1,"row2")
-			.putColumn("value1","chicken")
-			.putColumn("value2","sneeze");
 
 		try {
-			batch.execute();
+			String updateStatement = "update \"Test1\" set value1='chicken', value2='sneeze' "+
+					"where key='row2';";
+			getSession().execute(updateStatement);
 		}
-		catch (ConnectionException e) {
+		catch (Exception e) {
 			throw new MutagenException("Could not update columnfamily Test1",e);
 		}
 	}
+	@Override
+	protected String getRessourceName(){
+		return "V003";
+	}
 
-
-	final ColumnFamily<String,String> CF_TEST1=
-		ColumnFamily.newColumnFamily("Test1",
-			StringSerializer.get(),StringSerializer.get());
 	private State<Integer> state;
 }

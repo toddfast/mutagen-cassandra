@@ -1,10 +1,8 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
-
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
@@ -29,7 +27,6 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 */
 	public CQLMutation(String keyspace, String resourceName,Session session) {
 		super(keyspace,session);
-
 		state=super.parseVersion(resourceName);
 		this.ressource = resourceName.substring(resourceName
 				.lastIndexOf("/") + 1);
@@ -71,7 +68,6 @@ public class CQLMutation extends AbstractCassandraMutation {
 		}
 
 		String[] lines=source.split("\n");
-
 		StringBuilder statement=new StringBuilder();
 
 		for (int i=0; i<lines.length; i++) {
@@ -104,8 +100,6 @@ public class CQLMutation extends AbstractCassandraMutation {
 			}
 
 		}
-
-
 	}
 
 
@@ -194,11 +188,9 @@ public class CQLMutation extends AbstractCassandraMutation {
 		context.debug("Executing mutation {}",state.getID());
 		for (String statement: statements) {
 			context.debug("Executing CQL \"{}\"",statement);
-
 			try {
 				//execute the cql statement
-				//TODO
-				ResultSet result = session.execute(statement);
+				ResultSet result = getSession().execute(statement);
 				context.info("Successfully executed CQL \"{}\" in {} attempts",
 					statement,result);
 			}
@@ -222,6 +214,5 @@ public class CQLMutation extends AbstractCassandraMutation {
 	private String ressource;
 	private State<Integer> state;
 	private List<String> statements=new ArrayList<String>();
-	
-	private Session session;
+
 }
