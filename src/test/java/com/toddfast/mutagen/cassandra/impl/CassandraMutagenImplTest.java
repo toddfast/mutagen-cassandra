@@ -7,19 +7,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
-import com.netflix.astyanax.AstyanaxContext;
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
-import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
-import com.netflix.astyanax.ddl.SchemaChangeResult;
-import com.netflix.astyanax.impl.AstyanaxConfigurationImpl;
-import com.netflix.astyanax.model.ColumnFamily;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.ConsistencyLevel;
-import com.netflix.astyanax.serializers.StringSerializer;
-import com.netflix.astyanax.thrift.ThriftFamilyFactory;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.State;
 import java.io.IOException;
@@ -35,6 +26,8 @@ import static org.junit.Assert.*;
 public class CassandraMutagenImplTest {
 
 	public CassandraMutagenImplTest() {
+		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		this.session = cluster.connect(keyspace);
 	}
 
 
@@ -68,28 +61,16 @@ public class CassandraMutagenImplTest {
 		keyspace=context.getClient();
 	}
 
-	private static void createKeyspace()
-			throws ConnectionException {
+	private static void createKeyspace(){
 
 		System.out.println("Creating keyspace "+keyspace+"...");
-
+		//params for keyspace
 		int keyspaceReplicationFactor=1;
-
-		Map<String, Object> keyspaceConfig=
-			new HashMap<String, Object>();
-		keyspaceConfig.put("strategy_options",
-			ImmutableMap.<String, Object>builder()
-				.put("replication_factor",
-					""+keyspaceReplicationFactor)
-				.build());
-
 		String keyspaceStrategyClass="SimpleStrategy";
-		keyspaceConfig.put("strategy_class",keyspaceStrategyClass);
-
-		OperationResult<SchemaChangeResult> result=
-			keyspace.createKeyspace(
-				Collections.unmodifiableMap(keyspaceConfig));
-
+		
+		session.execute("CREATE KEYSPACE " + keyspace + "WITH REPLICATION"
+				+ "= {'class':"+
+				keyspaceStrategyClass+"', 'replication_factor':"+keyspaceReplicationFactor+"};");
 		System.out.println("Created keyspace "+keyspace);
 	}
 
@@ -204,6 +185,7 @@ public class CassandraMutagenImplTest {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
-	private static AstyanaxContext<Keyspace> context;
-	private static Keyspace keyspace;
+	private static String keyspace;
+	private Cluster cluster;
+	private Session session;
 }

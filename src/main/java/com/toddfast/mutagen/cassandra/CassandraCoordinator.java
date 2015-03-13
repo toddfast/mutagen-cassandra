@@ -1,8 +1,5 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.model.ColumnFamily;
-import com.netflix.astyanax.serializers.StringSerializer;
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
@@ -18,7 +15,7 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	 * 
 	 * 
 	 */
-	public CassandraCoordinator(Keyspace keyspace) {
+	public CassandraCoordinator(String keyspace) {
 		super();
 		if (keyspace==null) {
 			throw new IllegalArgumentException(
@@ -33,7 +30,7 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	 *
 	 *
 	 */
-	public Keyspace getKeyspace() {
+	public String getKeyspace() {
 		return keyspace;
 	}
 
@@ -56,11 +53,11 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
-	public static final ColumnFamily<String,String> VERSION_CF=
-		ColumnFamily.newColumnFamily(
-			"schema_version",
-			StringSerializer.get(),
-			StringSerializer.get());
+//	public static final ColumnFamily<String,String> VERSION_CF=
+//		ColumnFamily.newColumnFamily(
+//			"schema_version",
+//			StringSerializer.get(),
+//			StringSerializer.get());
 
-	private Keyspace keyspace;
+	private String keyspace;
 }

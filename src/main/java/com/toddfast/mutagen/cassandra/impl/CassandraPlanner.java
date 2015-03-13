@@ -1,6 +1,5 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-import com.netflix.astyanax.Keyspace;
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
@@ -23,7 +22,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 *
 	 */
-	protected CassandraPlanner(Keyspace keyspace, 
+	protected CassandraPlanner(String keyspace, 
 			List<String> mutationResources) {
 		super(loadMutations(keyspace,mutationResources),null);
 	}
@@ -34,7 +33,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static List<Mutation<Integer>> loadMutations(
-			Keyspace keyspace, Collection<String> resources) {
+			String keyspace, Collection<String> resources) {
 
 		List<Mutation<Integer>> result=new ArrayList<Mutation<Integer>>();
 
@@ -66,7 +65,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static Mutation<Integer> loadMutationClass(
-			Keyspace keyspace, String resource) {
+			String keyspace, String resource) {
 
 		assert resource.endsWith(".class"):
 			"Class resource name \""+resource+"\" should end with .class";
@@ -91,7 +90,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Mutation<Integer> mutation=null;
 			try {
 				// Try a constructor taking a keyspace
-				constructor=clazz.getConstructor(Keyspace.class);
+				constructor=clazz.getConstructor(String.class);
 				mutation=(Mutation<Integer>)constructor.newInstance(keyspace);
 			}
 			catch (NoSuchMethodException e) {

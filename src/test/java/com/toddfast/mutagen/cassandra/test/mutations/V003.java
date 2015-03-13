@@ -20,7 +20,7 @@ public class V003 extends AbstractCassandraMutation {
 	 *
 	 *
 	 */
-	public V003(Keyspace keyspace) {
+	public V003(String keyspace) {
 		super(keyspace);
 		state=new SimpleState<Integer>(3);
 	}

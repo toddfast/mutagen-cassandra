@@ -1,9 +1,5 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-//import com.conga.nu.AllowField;
-//import com.conga.nu.Scope;
-//import com.conga.nu.ServiceProvider;
-import com.netflix.astyanax.Keyspace;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.Planner;
@@ -11,6 +7,7 @@ import com.toddfast.mutagen.basic.ResourceScanner;
 import com.toddfast.mutagen.cassandra.CassandraCoordinator;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.CassandraSubject;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -88,7 +85,7 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 	 *
 	 */
 	@Override
-	public Plan.Result<Integer> mutate(Keyspace keyspace) {
+	public Plan.Result<Integer> mutate(String keyspace) {
 		// Do this in a VM-wide critical section. External cluster-wide 
 		// synchronization is going to have to happen in the coordinator.
 		synchronized (System.class) {

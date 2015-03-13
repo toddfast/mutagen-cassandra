@@ -1,12 +1,14 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.cql.CqlStatementResult;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.exceptions.QueryExecutionException;
+
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,9 +27,14 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 * 
 	 * 
 	 */
-	public CQLMutation(Keyspace keyspace, String resourceName) {
+	public CQLMutation(String keyspace, String resourceName) {
 		super(keyspace);
+		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		this.session = cluster.connect(keyspace);
+
 		state=super.parseVersion(resourceName);
+		this.ressource = resourceName.substring(resourceName
+				.lastIndexOf("/") + 1);
 		loadCQLStatements(resourceName);
 	}
 
@@ -40,7 +47,11 @@ public class CQLMutation extends AbstractCassandraMutation {
 	protected String getChangeSummary() {
 		return source;
 	}
-
+	
+	@Override
+	protected String getRessourceName(){
+		return ressource;
+	}
 
 	/**
 	 *
@@ -187,22 +198,16 @@ public class CQLMutation extends AbstractCassandraMutation {
 			context.debug("Executing CQL \"{}\"",statement);
 
 			try {
-				OperationResult<CqlStatementResult> result=
-					getKeyspace().prepareCqlStatement()
-						.withCql(statement)
-						.execute();
-
+				//execute the cql statement
+				//TODO
+				ResultSet result = session.execute(statement);
 				context.info("Successfully executed CQL \"{}\" in {} attempts",
-					statement,result.getAttemptsCount());
+					statement,result);
 			}
-			catch (ConnectionException e) {
+			catch (QueryExecutionException e) {
 				context.error("Exception executing CQL \"{}\"",statement,e);
 				throw new MutagenException("Exception executing CQL \""+
 					statement+"\"",e);
-			}
-			catch (RuntimeException e) {
-				context.error("Exception executing CQL \"{}\"",statement,e);
-				throw e;
 			}
 		}
 		context.debug("Done executing mutation {}",state.getID());
@@ -216,6 +221,10 @@ public class CQLMutation extends AbstractCassandraMutation {
 	////////////////////////////////////////////////////////////////////////////
 
 	private String source;
+	private String ressource;
 	private State<Integer> state;
 	private List<String> statements=new ArrayList<String>();
+	
+	private Cluster cluster;
+	private Session session;
 }

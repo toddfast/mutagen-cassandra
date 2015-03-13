@@ -1,14 +1,12 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.ddl.SchemaChangeResult;
-import com.netflix.astyanax.model.ColumnFamily;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.query.RowQuery;
-import com.netflix.astyanax.serializers.ByteBufferSerializer;
-import com.netflix.astyanax.serializers.StringSerializer;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+
+import java.util.List;
+
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
@@ -24,7 +22,7 @@ public class CassandraSubject implements Subject<Integer> {
 	 *
 	 *
 	 */
-	public CassandraSubject(Keyspace keyspace) {
+	public CassandraSubject(String keyspace) {
 		super();
 		if (keyspace==null) {
 			throw new IllegalArgumentException(
@@ -32,6 +30,8 @@ public class CassandraSubject implements Subject<Integer> {
 		}
 
 		this.keyspace=keyspace;
+		this.cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+		this.session = cluster.connect(keyspace);
 	}
 
 
@@ -39,63 +39,66 @@ public class CassandraSubject implements Subject<Integer> {
 	 *
 	 *
 	 */
-	public Keyspace getKeyspace() {
+	public String getKeyspace() {
 		return keyspace;
 	}
-
-
 	/**
-	 *
+	 * create version table
 	 *
 	 */
-	private void createSchemaVersionTable()
-			throws ConnectionException {
-		OperationResult<SchemaChangeResult> result=
-			getKeyspace().createColumnFamily(VERSION_CF,null);
+	public void createSchemaVersionTable(){
+		//createstatement
+		String createStatement = "CREATE TABLE \""+  
+		versionSchemaTable+
+		"\"( id bigint, filename varchar,timestamp timestamp, PRIMARY KEY(id))";
+		
+		session.execute(createStatement);
 	}
 
-
+	/**
+	 *  get current version record
+	 */
+	
+	public ResultSet getVersionRecord(){
+		//get version record
+		String selectStatement = "SELECT * FROM \"" + 
+									versionSchemaTable + "\"" + 
+									limit + ";";
+		return session.execute(selectStatement);
+	}
+	
 	/**
 	 * 
 	 * 
 	 */
 	@Override
 	public State<Integer> getCurrentState() {
-
-		RowQuery<String,String> query=
-			getKeyspace().prepareQuery(VERSION_CF)
-				.getKey(ROW_KEY);
-
-		OperationResult<ColumnList<String>> result=null;
-		try {
-			result=query.execute();
-		}
-		catch (ConnectionException e) {
-			// Probably because the table doesn't exist
-			try {
+		
+		ResultSet results = null;
+		try{
+			results = getVersionRecord();
+		}catch(Exception e){
+			try{
 				createSchemaVersionTable();
-			}
-			catch (ConnectionException ex) {
-				throw new MutagenException("Could not create column family "+
-					"\"schema_version\"",ex);
+			}catch(Exception e2){
+				throw new MutagenException("Could not create version table", e2);
 			}
 		}
-
-		// Now try again
 		try {
-			result=query.execute();
-		}
-		catch (ConnectionException e) {
-			throw new MutagenException("Could not retrieve version from "+
-				"column family \"schema_version\"",e);
+			results = getVersionRecord();
+		} catch (Exception e) {
+			throw new MutagenException(
+					"could not retreive Version table information", e);
+
 		}
 
-		ColumnList<String> columns=result.getResult();
-		Integer version=columns.getIntegerValue(VERSION_COLUMN,null);
+		List<Row> rows = results.all();
 
-		if (version==null) {
-			// Most likely the column family has only just been created
-			version=0;
+		int version = 0;
+		for (Row r1 : rows) {
+			int timestamp = r1.getInt("id");
+			if (version < timestamp)
+				version = timestamp;
 		}
 
 		return new SimpleState<Integer>(version);
@@ -108,14 +111,19 @@ public class CassandraSubject implements Subject<Integer> {
 	// Fields
 	////////////////////////////////////////////////////////////////////////////
 
-	public static final ColumnFamily<String,String> VERSION_CF=
-		ColumnFamily.newColumnFamily(
-			"schema_version",
-			StringSerializer.get(),
-			StringSerializer.get(),
-			ByteBufferSerializer.get());
-	public static final String ROW_KEY="state";
-	public static final String VERSION_COLUMN="version";
+//	public static final ColumnFamily<String,String> VERSION_CF=
+//		ColumnFamily.newColumnFamily(
+//			"schema_version",
+//			StringSerializer.get(),
+//			StringSerializer.get(),
+//			ByteBufferSerializer.get());
+//	public static final String ROW_KEY="state";
+//	public static final String VERSION_COLUMN="version";
 
-	private Keyspace keyspace;
+	private String keyspace;   //keyspace
+	private Cluster cluster;   //cluster
+	private Session session;   //session
+	
+	private String versionSchemaTable = "Version";
+	private String limit = " limit " + 1_000_000_000;
 }
