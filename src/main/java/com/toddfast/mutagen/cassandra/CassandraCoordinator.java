@@ -4,6 +4,7 @@ import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
 
+import com.datastax.driver.core.Session;
 /**
  *
  *
@@ -15,14 +16,14 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	 * 
 	 * 
 	 */
-	public CassandraCoordinator(String keyspace) {
+	public CassandraCoordinator(Session session) {
 		super();
-		if (keyspace==null) {
+		if (session==null) {
 			throw new IllegalArgumentException(
-				"Parameter \"keyspace\" cannot be null");
+				"Parameter \"session\" cannot be null");
 		}
 
-		this.keyspace=keyspace;
+		this.session=session;
 	}
 
 
@@ -30,8 +31,8 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	 *
 	 *
 	 */
-	public String getKeyspace() {
-		return keyspace;
+	public Session getSession() {
+		return session;
 	}
 
 
@@ -59,5 +60,5 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 //			StringSerializer.get(),
 //			StringSerializer.get());
 
-	private String keyspace;
+	private Session session;
 }

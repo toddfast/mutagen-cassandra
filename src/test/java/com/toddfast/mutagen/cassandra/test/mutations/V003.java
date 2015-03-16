@@ -17,8 +17,8 @@ public class V003 extends AbstractCassandraMutation {
 	 *
 	 *
 	 */
-	public V003(String keyspace,Session session) {
-		super(keyspace,session);
+	public V003(Session session) {
+		super(session);
 		state=new SimpleState<Integer>(3);
 	}
 

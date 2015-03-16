@@ -24,9 +24,9 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 *
 	 */
-	protected CassandraPlanner(String keyspace, 
-			List<String> mutationResources,Session session) {
-		super(loadMutations(keyspace,mutationResources,session),null);
+	protected CassandraPlanner(Session session, 
+			List<String> mutationResources) {
+		super(loadMutations(session,mutationResources),null);
 		this.session = session;
 	}
 
@@ -36,7 +36,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static List<Mutation<Integer>> loadMutations(
-			String keyspace, Collection<String> resources,Session session) {
+			Session session, Collection<String> resources) {
 		List<Mutation<Integer>> result=new ArrayList<Mutation<Integer>>();
 
 		for (String resource: resources) {
@@ -44,12 +44,12 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			// for SQL but not CQL
 			if (resource.endsWith(".cql") || resource.endsWith(".sql")) {
 				result.add(
-					new CQLMutation(keyspace,resource,session));
+					new CQLMutation(session,resource));
 			}
 			else
 			if (resource.endsWith(".class")) {
 				result.add(
-					loadMutationClass(keyspace,resource,session));
+					loadMutationClass(session,resource));
 			}
 			else {
 				throw new IllegalArgumentException("Unknown type for "+
@@ -66,7 +66,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	private static Mutation<Integer> loadMutationClass(
-			String keyspace, String resource, Session session) {
+			Session session, String resource) {
 
 		assert resource.endsWith(".class"):
 			"Class resource name \""+resource+"\" should end with .class";
@@ -91,8 +91,8 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Mutation<Integer> mutation=null;
 			try {
 				// Try a constructor taking a keyspace and a session
-				constructor=clazz.getConstructor(String.class,Session.class);
-				mutation=(Mutation<Integer>)constructor.newInstance(keyspace,session);
+				constructor=clazz.getConstructor(Session.class);
+				mutation=(Mutation<Integer>)constructor.newInstance(session);
 			}
 			catch (NoSuchMethodException e) {
 				// Wrong assumption

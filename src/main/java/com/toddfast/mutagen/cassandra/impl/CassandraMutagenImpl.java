@@ -1,12 +1,12 @@
 package com.toddfast.mutagen.cassandra.impl;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
-import com.toddfast.mutagen.Mutation;
+
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.Planner;
 import com.toddfast.mutagen.basic.ResourceScanner;
+
 import com.toddfast.mutagen.cassandra.CassandraCoordinator;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.CassandraSubject;
@@ -88,33 +88,25 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 	 *
 	 */
 	@Override
-	public Plan.Result<Integer> mutate(String keyspace) {
+	public Plan.Result<Integer> mutate(Session session) {
 		// Do this in a VM-wide critical section. External cluster-wide 
 		// synchronization is going to have to happen in the coordinator.
 		
-		
 		synchronized (System.class) {
-			cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-			session = cluster.connect(keyspace);
 			
-			CassandraCoordinator coordinator=new CassandraCoordinator(keyspace);
-			CassandraSubject subject=new CassandraSubject(keyspace,session);
+			CassandraCoordinator coordinator=new CassandraCoordinator(session);
+			CassandraSubject subject=new CassandraSubject(session);
 			
 			Planner<Integer> planner=
-				new CassandraPlanner(keyspace,getResources(),session);
+				new CassandraPlanner(session,getResources());
 			Plan<Integer> plan=planner.getPlan(subject,coordinator);
 			
 			// Execute the plan
 			Plan.Result<Integer> result=plan.execute();
-			//close session and cluster
-//			session.close();
-//			cluster.close();
 			
 			return result;
 		}
 	}
-
-
 
 
 	////////////////////////////////////////////////////////////////////////////
@@ -176,8 +168,4 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 
 //	@AllowField
 	private List<String> resources;
-	
-	private String keyspace;
-	private Cluster cluster;
-	private Session session;
 }

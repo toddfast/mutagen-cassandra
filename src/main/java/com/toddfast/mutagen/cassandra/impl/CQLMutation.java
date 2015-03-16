@@ -25,8 +25,8 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 * 
 	 * 
 	 */
-	public CQLMutation(String keyspace, String resourceName,Session session) {
-		super(keyspace,session);
+	public CQLMutation(Session session, String resourceName) {
+		super(session);
 		state=super.parseVersion(resourceName);
 		this.ressource = resourceName.substring(resourceName
 				.lastIndexOf("/") + 1);

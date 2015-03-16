@@ -23,10 +23,8 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	/**
 	 *
 	 */
-	protected AbstractCassandraMutation(String keyspace,Session session) {
+	protected AbstractCassandraMutation(Session session) {
 		super();
-		this.keyspace=keyspace;
-		//get session
 		this.session = session;
 	}
 
@@ -87,9 +85,6 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 *
 	 *
 	 */
-	protected String getKeyspace() {
-		return keyspace;
-	}
 	protected Session getSession(){
 		return session;
 	}
@@ -289,7 +284,6 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 
 	private String fileSeparator = "/";		//file separator
 	private String cqlMigrationSeparator = "_";  //script separator
-	private String keyspace;   //keyspace
 	
 	private Session session;   //session
 	

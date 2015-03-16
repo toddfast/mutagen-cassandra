@@ -21,14 +21,13 @@ public class CassandraSubject implements Subject<Integer> {
 	 *
 	 *
 	 */
-	public CassandraSubject(String keyspace,Session session) {
+	public CassandraSubject(Session session) {
 		super();
-		if (keyspace==null) {
+		if (session==null) {
 			throw new IllegalArgumentException(
 				"Parameter \"keyspace\" cannot be null");
 		}
 
-		this.keyspace = keyspace;
 		this.session = session;
 	}
 
@@ -37,8 +36,8 @@ public class CassandraSubject implements Subject<Integer> {
 	 *
 	 *
 	 */
-	public String getKeyspace() {
-		return keyspace;
+	public Session getSession() {
+		return session;
 	}
 	/**
 	 * create version table
@@ -118,7 +117,6 @@ public class CassandraSubject implements Subject<Integer> {
 //	public static final String ROW_KEY="state";
 //	public static final String VERSION_COLUMN="version";
 
-	private String keyspace;   //keyspace
 	private Session session;   //session
 	
 	private String versionSchemaTable = "Version";

@@ -2,7 +2,7 @@ package com.toddfast.mutagen.cassandra;
 
 import com.toddfast.mutagen.Plan;
 import java.io.IOException;
-
+import com.datastax.driver.core.Session;
 /**
  *
  *
@@ -22,5 +22,5 @@ public interface CassandraMutagen {
 	 *
 	 *
 	 */
-	public Plan.Result<Integer> mutate(String keyspace);
+	public Plan.Result<Integer> mutate(Session session);
 }

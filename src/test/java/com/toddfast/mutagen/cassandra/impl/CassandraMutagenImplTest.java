@@ -8,6 +8,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import info.archinnov.achilles.junit.AchillesResource;
+import info.archinnov.achilles.junit.AchillesResourceBuilder;
+
 import com.google.common.collect.ImmutableMap;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
@@ -25,6 +28,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
+import org.junit.Rule;
 /**
  *
  * @author Todd Fast
@@ -34,29 +38,33 @@ public class CassandraMutagenImplTest {
 	@BeforeClass
 	public static void setUpClass()
 			throws Exception {
-		cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
-		session = cluster.connect(keyspace);
+		createSession();
+		createKeyspace(session);
 	}
-
-	private static void createKeyspace(){
-
-		System.out.println("Creating keyspace "+keyspace+"...");
-		//params for keyspace
-		int keyspaceReplicationFactor=1;
-		String keyspaceStrategyClass="SimpleStrategy";
+	private static void  createSession(){
 		
-		session.execute("CREATE KEYSPACE " + keyspace + " WITH REPLICATION "
-				+ "= {'class':"+
-				keyspaceStrategyClass+"', 'replication_factor':"+keyspaceReplicationFactor+"};");
+		resource = AchillesResourceBuilder
+				.noEntityPackages().withKeyspaceName(keyspace).build();
+		session = resource.getNativeSession();
+	}
+	private static void createKeyspace(Session session){
+		session.execute("DROP KEYSPACE " + keyspace);
+		System.out.println("Creating keyspace "+keyspace+"...");
+		String createKeyspace = "CREATE KEYSPACE apispark WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };";
+		session.execute(createKeyspace);
 		System.out.println("Created keyspace "+keyspace);
+		
+		//bind session to keyspace
+		session.execute("use " + keyspace + ";");
+		System.out.println("the current keyspace:" + session.getLoggedKeyspace());
 	}
 
 
 	@AfterClass
 	public static void tearDownClass()
 			throws Exception {
-//		ResultSet result=session.execute("DROP KEYSPACE" + keyspace);
-//		System.out.println("Dropped keyspace "+keyspace);
+		ResultSet result=session.execute("DROP KEYSPACE " + keyspace);
+		System.out.println("Dropped keyspace "+keyspace);
 	}
 
 
@@ -86,7 +94,7 @@ public class CassandraMutagenImplTest {
 		mutagen.initialize(rootResourcePath);
 
 		// Mutate!
-		Plan.Result<Integer> result=mutagen.mutate(keyspace);
+		Plan.Result<Integer> result=mutagen.mutate(session);
 
 		return result;
 	}
@@ -157,6 +165,7 @@ public class CassandraMutagenImplTest {
 	////////////////////////////////////////////////////////////////////////////
 
 	private static String keyspace = "apispark";
-	private static Cluster cluster;
+	
+	private static AchillesResource resource; 
 	private static Session session;
 }
