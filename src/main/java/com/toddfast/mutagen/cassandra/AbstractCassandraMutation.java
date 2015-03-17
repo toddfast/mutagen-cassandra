@@ -93,7 +93,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 * Perform the actual mutation
 	 *
 	 */
-	protected abstract void performMutation(Context context);
+	protected abstract boolean performMutation(Context context);
 
 
 	/**
@@ -118,14 +118,19 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	/**
 	 * append the version record
 	 */
-	protected void appendVersionRecord(int version,String filename){
+	protected void appendVersionRecord(int version,String filename,String checksum,int execution_time, boolean success){
 		//insert version record
-		String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (id,filename,timestamp) VALUES (?,?,?);";
+		String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
+																+ "execution_data,execution_time,success) "
+																+ "VALUES (?,?,?,?,?,?);";
 		
 		PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
-		session.execute(preparedInsertStatement.bind(new Long(version), 
+		session.execute(preparedInsertStatement.bind(Integer.toString(version), 
 													filename, 
-													new Timestamp(new Date().getTime())
+													checksum,
+													new Timestamp(new Date().getTime()),
+													execution_time,
+													success
 													));
 		}
 	
@@ -138,7 +143,11 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 			throws MutagenException {
 
 		// Perform the mutation
-		performMutation(context);
+		long startTime = System.currentTimeMillis();
+		boolean success = performMutation(context);
+		long endTime = System.currentTimeMillis();
+		long execution_time = endTime - startTime;
+		
 		int version=getResultingState().getID();
 		
 		System.out.println(version);
@@ -148,10 +157,10 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 			change="";
 		}
 
-		String changeHash=md5String(change);
+		String checksum=md5String(change);
 
 		// append version record
-		appendVersionRecord(version,getRessourceName());
+		appendVersionRecord(version,getRessourceName(),checksum,(int)execution_time,success);
 		
 // TAF: Why does this fail with a StaleLockException? Do we need to use a
 // separate lock table?

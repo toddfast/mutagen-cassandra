@@ -1,34 +1,29 @@
 package com.toddfast.mutagen.cassandra.impl;
 
+import com.toddfast.mutagen.Plan;
+import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import info.archinnov.achilles.junit.AchillesResource;
 import info.archinnov.achilles.junit.AchillesResourceBuilder;
 
-import com.google.common.collect.ImmutableMap;
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-import com.toddfast.mutagen.Plan;
-import com.toddfast.mutagen.State;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
-import org.junit.Rule;
 /**
  *
  * @author Todd Fast
@@ -38,14 +33,7 @@ public class CassandraMutagenImplTest {
 	@BeforeClass
 	public static void setUpClass()
 			throws Exception {
-		createSession();
 		createKeyspace(session);
-	}
-	private static void  createSession(){
-		
-		resource = AchillesResourceBuilder
-				.noEntityPackages().withKeyspaceName(keyspace).build();
-		session = resource.getNativeSession();
 	}
 	private static void createKeyspace(Session session){
 		session.execute("DROP KEYSPACE " + keyspace);
@@ -63,8 +51,8 @@ public class CassandraMutagenImplTest {
 	@AfterClass
 	public static void tearDownClass()
 			throws Exception {
-		ResultSet result=session.execute("DROP KEYSPACE " + keyspace);
-		System.out.println("Dropped keyspace "+keyspace);
+		session.execute("DROP KEYSPACE " + keyspace);
+		System.out.println("Dropped keyspace : "+keyspace);
 	}
 
 
@@ -165,7 +153,8 @@ public class CassandraMutagenImplTest {
 	////////////////////////////////////////////////////////////////////////////
 
 	private static String keyspace = "apispark";
-	
-	private static AchillesResource resource; 
-	private static Session session;
+	@Rule
+	public static AchillesResource resource = AchillesResourceBuilder
+	.noEntityPackages().withKeyspaceName(keyspace).build();
+	public static Session session = resource.getNativeSession();
 }

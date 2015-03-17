@@ -184,7 +184,8 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 *
 	 */
 	@Override
-	protected void performMutation(Context context) {
+	protected boolean performMutation(Context context) {
+		boolean success = true;
 		context.debug("Executing mutation {}",state.getID());
 		for (String statement: statements) {
 			context.debug("Executing CQL \"{}\"",statement);
@@ -195,12 +196,14 @@ public class CQLMutation extends AbstractCassandraMutation {
 					statement,result);
 			}
 			catch (QueryExecutionException e) {
+				success = false;
 				context.error("Exception executing CQL \"{}\"",statement,e);
 				throw new MutagenException("Exception executing CQL \""+
 					statement+"\"",e);
 			}
 		}
 		context.debug("Done executing mutation {}",state.getID());
+		return success;
 	}
 
 

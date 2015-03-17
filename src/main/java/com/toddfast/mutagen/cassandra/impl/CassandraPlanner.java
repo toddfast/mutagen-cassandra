@@ -27,7 +27,6 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	protected CassandraPlanner(Session session, 
 			List<String> mutationResources) {
 		super(loadMutations(session,mutationResources),null);
-		this.session = session;
 	}
 
 
@@ -90,7 +89,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Constructor<?> constructor;
 			Mutation<Integer> mutation=null;
 			try {
-				// Try a constructor taking a keyspace and a session
+				// Try a constructor taking a session
 				constructor=clazz.getConstructor(Session.class);
 				mutation=(Mutation<Integer>)constructor.newInstance(session);
 			}
@@ -152,6 +151,4 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 			Coordinator<Integer> coordinator) {
 		return super.getPlan(subject,coordinator);
 	}
-	
-	private Session session;
 }
