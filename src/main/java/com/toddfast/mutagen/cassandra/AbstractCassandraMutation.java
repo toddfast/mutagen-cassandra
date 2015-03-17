@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.PreparedStatement;
-
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.State;
@@ -93,7 +92,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 * Perform the actual mutation
 	 *
 	 */
-	protected abstract boolean performMutation(Context context);
+	protected abstract void performMutation(Context context);
 
 
 	/**
@@ -121,11 +120,11 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	protected void appendVersionRecord(int version,String filename,String checksum,int execution_time, boolean success){
 		//insert version record
 		String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
-																+ "execution_data,execution_time,success) "
+																+ "execution_date,execution_time,success) "
 																+ "VALUES (?,?,?,?,?,?);";
 		
 		PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
-		session.execute(preparedInsertStatement.bind(Integer.toString(version), 
+		session.execute(preparedInsertStatement.bind(new Long(version), 
 													filename, 
 													checksum,
 													new Timestamp(new Date().getTime()),
@@ -143,14 +142,18 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 			throws MutagenException {
 
 		// Perform the mutation
+		boolean success = true;
 		long startTime = System.currentTimeMillis();
-		boolean success = performMutation(context);
+		try{
+			performMutation(context);
+			}catch(MutagenException e){
+				success = false;
+				e.printStackTrace();
+			};
 		long endTime = System.currentTimeMillis();
 		long execution_time = endTime - startTime;
 		
 		int version=getResultingState().getID();
-		
-		System.out.println(version);
 		
 		String change=getChangeSummary();
 		if (change==null) {

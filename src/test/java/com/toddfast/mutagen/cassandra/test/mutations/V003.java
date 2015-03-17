@@ -41,8 +41,7 @@ public class V003 extends AbstractCassandraMutation {
 	}
 
 	@Override
-	protected boolean performMutation(Context context) {
-		boolean success = true;
+	protected void performMutation(Context context) {
 		context.debug("Executing mutation {}",state.getID());
 
 		try {
@@ -51,10 +50,8 @@ public class V003 extends AbstractCassandraMutation {
 			getSession().execute(updateStatement);
 		}
 		catch (Exception e) {
-			success = false;
 			throw new MutagenException("Could not update columnfamily Test1",e);
 		}
-		return success;
 	}
 	@Override
 	protected String getRessourceName(){

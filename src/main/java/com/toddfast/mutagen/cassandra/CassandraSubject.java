@@ -1,9 +1,12 @@
 package com.toddfast.mutagen.cassandra;
 
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import com.toddfast.mutagen.MutagenException;
@@ -29,6 +32,7 @@ public class CassandraSubject implements Subject<Integer> {
 		}
 
 		this.session = session;
+		this.version = -1;
 	}
 
 
@@ -47,8 +51,8 @@ public class CassandraSubject implements Subject<Integer> {
 		//createstatement
 		String createStatement = "CREATE TABLE \""+  
 		versionSchemaTable+
-		"\"( versionid varchar, filename varchar,checksum varchar,"
-		+ "execution_data timestamp,execution_time int,"
+		"\"( versionid bigint, filename varchar,checksum varchar,"
+		+ "execution_date timestamp,execution_time int,"
 		+ "success boolean, PRIMARY KEY(versionid))";
 		
 		session.execute(createStatement);
@@ -72,34 +76,34 @@ public class CassandraSubject implements Subject<Integer> {
 	 */
 	@Override
 	public State<Integer> getCurrentState() {
-		
-		ResultSet results = null;
-		try{
-			results = getVersionRecord();
-		}catch(Exception e){
+		if(version < 0){
+			ResultSet results = null;
 			try{
-				createSchemaVersionTable();
-			}catch(Exception e2){
-				throw new MutagenException("Could not create version table", e2);
+				results = getVersionRecord();
+			}catch(Exception e){
+				try{
+					createSchemaVersionTable();
+				}catch(Exception e2){
+					throw new MutagenException("Could not create version table", e2);
+				}
+			}
+			try {
+				results = getVersionRecord();
+			} catch (Exception e) {
+				throw new MutagenException(
+						"could not retreive Version table information", e);
+	
+			}
+	
+			List<Row> rows = results.all();
+	
+			for (Row r1 : rows) {
+				int timestamp = (int)r1.getLong("versionid");
+				if (version < timestamp)
+					version = timestamp;
 			}
 		}
-		try {
-			results = getVersionRecord();
-		} catch (Exception e) {
-			throw new MutagenException(
-					"could not retreive Version table information", e);
-
-		}
-
-		List<Row> rows = results.all();
-
-		int version = 0;
-		for (Row r1 : rows) {
-			int timestamp = r1.getInt("id");
-			if (version < timestamp)
-				version = timestamp;
-		}
-
+		version = version < 0 ? 0 : version;
 		return new SimpleState<Integer>(version);
 	}
 
@@ -120,6 +124,7 @@ public class CassandraSubject implements Subject<Integer> {
 //	public static final String VERSION_COLUMN="version";
 
 	private Session session;   //session
+	private int version; //current version
 	
 	private String versionSchemaTable = "Version";
 	private String limit = " limit " + 1_000_000_000;

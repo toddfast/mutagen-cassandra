@@ -40,7 +40,7 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 				ResourceScanner.getInstance().getResources(
 					rootResourcePath,Pattern.compile(".*"),
 					getClass().getClassLoader());
-
+			
 			// Make sure we found some resources
 			if (discoveredResources.isEmpty()) {
 				throw new IllegalArgumentException("Could not find resources "+
@@ -96,7 +96,7 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 			
 			CassandraCoordinator coordinator=new CassandraCoordinator(session);
 			CassandraSubject subject=new CassandraSubject(session);
-			
+						
 			Planner<Integer> planner=
 				new CassandraPlanner(session,getResources());
 			Plan<Integer> plan=planner.getPlan(subject,coordinator);

@@ -44,6 +44,7 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	public boolean accept(Subject<Integer> subject,
 			State<Integer> targetState) {
 		State<Integer> currentState=subject.getCurrentState();
+		System.out.println("currentstate:" + currentState.getID());
 		return targetState.getID() > currentState.getID();
 	}
 

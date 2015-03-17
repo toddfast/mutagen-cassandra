@@ -21,6 +21,8 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -45,9 +47,9 @@ public class CassandraMutagenImplTest {
 		//bind session to keyspace
 		session.execute("use " + keyspace + ";");
 		System.out.println("the current keyspace:" + session.getLoggedKeyspace());
+		
 	}
-
-
+	
 	@AfterClass
 	public static void tearDownClass()
 			throws Exception {
@@ -64,7 +66,6 @@ public class CassandraMutagenImplTest {
 	@After
 	public void tearDown() {
 	}
-
 
 	/**
 	 * This is it!
