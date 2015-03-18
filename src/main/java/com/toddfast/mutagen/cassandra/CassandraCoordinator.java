@@ -38,6 +38,7 @@ public class CassandraCoordinator implements Coordinator<String> {
 	 * 
 	 * 
 	 */
+
     @Override
     public boolean accept(Subject<String> subject,
             State<String> targetState) {
@@ -57,4 +58,5 @@ public class CassandraCoordinator implements Coordinator<String> {
     // StringSerializer.get());
 
     private Session session;
+
 }
