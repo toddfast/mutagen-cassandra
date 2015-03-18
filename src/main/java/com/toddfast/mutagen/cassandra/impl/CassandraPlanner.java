@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Todd Fast
  */
-public class CassandraPlanner extends BasicPlanner<Integer> {
+public class CassandraPlanner extends BasicPlanner<String> {
 
 	/**
 	 *
@@ -34,9 +34,9 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 *
 	 */
-	private static List<Mutation<Integer>> loadMutations(
+	private static List<Mutation<String>> loadMutations(
 			Session session, Collection<String> resources) {
-		List<Mutation<Integer>> result=new ArrayList<Mutation<Integer>>();
+		List<Mutation<String>> result=new ArrayList<Mutation<String>>();
 
 		for (String resource: resources) {
 			// Allow .sql files because some editors have syntax highlighting
@@ -64,7 +64,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 *
 	 */
-	private static Mutation<Integer> loadMutationClass(
+	private static Mutation<String> loadMutationClass(
 			Session session, String resource) {
 
 		assert resource.endsWith(".class"):
@@ -87,11 +87,11 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 		// Instantiate the class
 		try {
 			Constructor<?> constructor;
-			Mutation<Integer> mutation=null;
+			Mutation<String> mutation=null;
 			try {
 				// Try a constructor taking a session
 				constructor=clazz.getConstructor(Session.class);
-				mutation=(Mutation<Integer>)constructor.newInstance(session);
+				mutation=(Mutation<String>)constructor.newInstance(session);
 			}
 			catch (NoSuchMethodException e) {
 				// Wrong assumption
@@ -101,7 +101,7 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 				// Try the null constructor
 				try {
 					constructor=clazz.getConstructor();
-					mutation=(Mutation<Integer>)constructor.newInstance();
+					mutation=(Mutation<String>)constructor.newInstance();
 				}
 				catch (NoSuchMethodException e) {
 					throw new MutagenException("Could not find comparible "+
@@ -136,8 +136,8 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 *
 	 */
 	@Override
-	protected Mutation.Context createContext(Subject<Integer> subject,
-		Coordinator<Integer> coordinator) {
+	protected Mutation.Context createContext(Subject<String> subject,
+		Coordinator<String> coordinator) {
 		return new CassandraContext(subject,coordinator);
 	}
 
@@ -147,8 +147,8 @@ public class CassandraPlanner extends BasicPlanner<Integer> {
 	 * 
 	 */
 	@Override
-	public Plan<Integer> getPlan(Subject<Integer> subject,
-			Coordinator<Integer> coordinator) {
+	public Plan<String> getPlan(Subject<String> subject,
+			Coordinator<String> coordinator) {
 		return super.getPlan(subject,coordinator);
 	}
 }

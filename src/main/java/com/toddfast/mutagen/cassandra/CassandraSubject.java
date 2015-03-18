@@ -18,7 +18,7 @@ import com.toddfast.mutagen.basic.SimpleState;
  *
  * @author Todd Fast
  */
-public class CassandraSubject implements Subject<Integer> {
+public class CassandraSubject implements Subject<String> {
 
 	/**
 	 *
@@ -32,7 +32,7 @@ public class CassandraSubject implements Subject<Integer> {
 		}
 
 		this.session = session;
-		this.version = -1;
+		this.version = null;
 	}
 
 
@@ -75,8 +75,8 @@ public class CassandraSubject implements Subject<Integer> {
 	 * 
 	 */
 	@Override
-	public State<Integer> getCurrentState() {
-		if(version < 0){
+	public State<String> getCurrentState() {
+		if(version == null){
 			ResultSet results = null;
 			try{
 				results = getVersionRecord();
@@ -98,13 +98,13 @@ public class CassandraSubject implements Subject<Integer> {
 			List<Row> rows = results.all();
 	
 			for (Row r1 : rows) {
-				int timestamp = (int)r1.getLong("versionid");
-				if (version < timestamp)
-					version = timestamp;
+				 String versionid = r1.getString("versionid");
+				if (version.compareTo(versionid) < 0 )
+					version = versionid;
 			}
 		}
-		version = version < 0 ? 0 : version;
-		return new SimpleState<Integer>(version);
+		version = version==null ? "000000000000" : version;
+		return new SimpleState<String>(version);
 	}
 
 
@@ -124,7 +124,7 @@ public class CassandraSubject implements Subject<Integer> {
 //	public static final String VERSION_COLUMN="version";
 
 	private Session session;   //session
-	private int version; //current version
+	private String version; //current version
 	
 	private String versionSchemaTable = "Version";
 	private String limit = " limit " + 1_000_000_000;

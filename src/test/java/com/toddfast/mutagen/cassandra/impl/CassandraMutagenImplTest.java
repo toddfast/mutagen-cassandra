@@ -71,7 +71,7 @@ public class CassandraMutagenImplTest {
 	 * This is it!
 	 *
 	 */
-	private Plan.Result<Integer> mutate()
+	private Plan.Result<String> mutate()
 			throws IOException {
 
 		// Get an instance of CassandraMutagen
@@ -83,7 +83,7 @@ public class CassandraMutagenImplTest {
 		mutagen.initialize(rootResourcePath);
 
 		// Mutate!
-		Plan.Result<Integer> result=mutagen.mutate(session);
+		Plan.Result<String> result=mutagen.mutate(session);
 
 		return result;
 	}
@@ -96,7 +96,7 @@ public class CassandraMutagenImplTest {
 	@Test
 	public void testInitialize() throws Exception {
 		
-		Plan.Result<Integer> result = mutate();
+		Plan.Result<String> result = mutate();
 
 		// Check the results
 		State<Integer> state=result.getLastState();

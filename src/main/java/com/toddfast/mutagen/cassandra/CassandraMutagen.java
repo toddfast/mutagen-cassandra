@@ -22,5 +22,5 @@ public interface CassandraMutagen {
 	 *
 	 *
 	 */
-	public Plan.Result<Integer> mutate(Session session);
+	public Plan.Result<String> mutate(Session session);
 }

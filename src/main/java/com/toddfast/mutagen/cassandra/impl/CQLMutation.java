@@ -174,7 +174,7 @@ public class CQLMutation extends AbstractCassandraMutation {
 	 *
 	 */
 	@Override
-	public State<Integer> getResultingState() {
+	public State<String> getResultingState() {
 		return state;
 	}
 
@@ -212,7 +212,7 @@ public class CQLMutation extends AbstractCassandraMutation {
 
 	private String source;
 	private String ressource;
-	private State<Integer> state;
+	private State<String> state;
 	private List<String> statements=new ArrayList<String>();
 
 }

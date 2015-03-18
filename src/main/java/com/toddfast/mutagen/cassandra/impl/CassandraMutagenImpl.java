@@ -88,7 +88,7 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 	 *
 	 */
 	@Override
-	public Plan.Result<Integer> mutate(Session session) {
+	public Plan.Result<String> mutate(Session session) {
 		// Do this in a VM-wide critical section. External cluster-wide 
 		// synchronization is going to have to happen in the coordinator.
 		
@@ -97,12 +97,12 @@ public class CassandraMutagenImpl implements CassandraMutagen {
 			CassandraCoordinator coordinator=new CassandraCoordinator(session);
 			CassandraSubject subject=new CassandraSubject(session);
 						
-			Planner<Integer> planner=
+			Planner<String> planner=
 				new CassandraPlanner(session,getResources());
-			Plan<Integer> plan=planner.getPlan(subject,coordinator);
+			Plan<String> plan=planner.getPlan(subject,coordinator);
 			
 			// Execute the plan
-			Plan.Result<Integer> result=plan.execute();
+			Plan.Result<String> result=plan.execute();
 			
 			return result;
 		}

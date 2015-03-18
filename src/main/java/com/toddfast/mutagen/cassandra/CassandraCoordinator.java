@@ -10,7 +10,7 @@ import com.datastax.driver.core.Session;
  *
  * @author Todd Fast
  */
-public class CassandraCoordinator implements Coordinator<Integer> {
+public class CassandraCoordinator implements Coordinator<String> {
 
 	/**
 	 * 
@@ -41,11 +41,11 @@ public class CassandraCoordinator implements Coordinator<Integer> {
 	 * 
 	 */
 	@Override
-	public boolean accept(Subject<Integer> subject,
-			State<Integer> targetState) {
-		State<Integer> currentState=subject.getCurrentState();
+	public boolean accept(Subject<String> subject,
+			State<String> targetState) {
+		State<String> currentState=subject.getCurrentState();
 		System.out.println("currentstate:" + currentState.getID());
-		return targetState.getID() > currentState.getID();
+		return (targetState.getID().compareTo(currentState.getID()) >0 );
 	}
 
 

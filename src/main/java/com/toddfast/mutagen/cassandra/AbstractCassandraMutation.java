@@ -18,7 +18,7 @@ import com.toddfast.mutagen.basic.SimpleState;
  *
  * @author Todd Fast
  */
-public abstract class AbstractCassandraMutation implements Mutation<Integer> {
+public abstract class AbstractCassandraMutation implements Mutation<String> {
 	/**
 	 *
 	 */
@@ -47,7 +47,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 *
 	 *
 	 */
-	protected final State<Integer> parseVersion(String resourceName) {
+	protected final State<String> parseVersion(String resourceName) {
 		String versionString=resourceName;
 		int index=versionString.lastIndexOf(fileSeparator);
 		if (index!=-1) {
@@ -76,7 +76,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 			}
 		}
 
-		return new SimpleState<Integer>(Integer.parseInt(buffer.toString()));
+		return new SimpleState<String>(buffer.toString());
 	}
 
 
@@ -100,7 +100,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	 *
 	 */
 	@Override
-	public abstract State<Integer> getResultingState();
+	public abstract State<String> getResultingState();
 
 
 	/**
@@ -117,14 +117,14 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 	/**
 	 * append the version record
 	 */
-	protected void appendVersionRecord(int version,String filename,String checksum,int execution_time, boolean success){
+	protected void appendVersionRecord(String version,String filename,String checksum,int execution_time, boolean success){
 		//insert version record
 		String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
 																+ "execution_date,execution_time,success) "
 																+ "VALUES (?,?,?,?,?,?);";
 		
 		PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
-		session.execute(preparedInsertStatement.bind(new Long(version), 
+		session.execute(preparedInsertStatement.bind(version, 
 													filename, 
 													checksum,
 													new Timestamp(new Date().getTime()),
@@ -153,7 +153,7 @@ public abstract class AbstractCassandraMutation implements Mutation<Integer> {
 		long endTime = System.currentTimeMillis();
 		long execution_time = endTime - startTime;
 		
-		int version=getResultingState().getID();
+		String version=getResultingState().getID();
 		
 		String change=getChangeSummary();
 		if (change==null) {
