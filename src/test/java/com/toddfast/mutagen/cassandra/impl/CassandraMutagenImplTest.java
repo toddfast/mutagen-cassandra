@@ -31,12 +31,12 @@ import static org.junit.Assert.*;
  * @author Todd Fast
  */
 public class CassandraMutagenImplTest {
-
-	@BeforeClass
-	public static void setUpClass()
-			throws Exception {
-		createKeyspace(session);
-	}
+//
+//	@BeforeClass
+//	public static void setUpClass()
+//			throws Exception {
+//		createKeyspace(session);
+//	}
 	private static void createKeyspace(Session session){
 		session.execute("DROP KEYSPACE " + keyspace);
 		System.out.println("Creating keyspace "+keyspace+"...");
@@ -50,22 +50,22 @@ public class CassandraMutagenImplTest {
 		
 	}
 	
-	@AfterClass
-	public static void tearDownClass()
-			throws Exception {
-		session.execute("DROP KEYSPACE " + keyspace);
-		System.out.println("Dropped keyspace : "+keyspace);
-	}
-
-
-	@Before
-	public void setUp() {
-	}
-
-
-	@After
-	public void tearDown() {
-	}
+//	@AfterClass
+//	public static void tearDownClass()
+//			throws Exception {
+//		session.execute("DROP KEYSPACE " + keyspace);
+//		System.out.println("Dropped keyspace : "+keyspace);
+//	}
+//
+//
+//	@Before
+//	public void setUp() {
+//	}
+//
+//
+//	@After
+//	public void tearDown() {
+//	}
 
 	/**
 	 * This is it!
@@ -130,6 +130,8 @@ public class CassandraMutagenImplTest {
 	}
 	@Test
 	public void testData() throws Exception {
+	    
+	    //prepare
 		ResultSet results1 = query("row1");
 		Row row1 = results1.one();
 		assertEquals("foo",row1.getString("value1"));
@@ -155,7 +157,8 @@ public class CassandraMutagenImplTest {
 
 	private static String keyspace = "apispark";
 	@Rule
-	public static AchillesResource resource = AchillesResourceBuilder
+	public AchillesResource resource = AchillesResourceBuilder
 	.noEntityPackages().withKeyspaceName(keyspace).build();
-	public static Session session = resource.getNativeSession();
+	
+	public Session session = resource.getNativeSession();
 }
