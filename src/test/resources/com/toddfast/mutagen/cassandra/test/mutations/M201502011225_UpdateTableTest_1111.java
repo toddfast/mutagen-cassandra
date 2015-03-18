@@ -1,7 +1,6 @@
 package com.toddfast.mutagen.cassandra.test.mutations;
 
 import com.datastax.driver.core.Session;
-
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.basic.SimpleState;
@@ -11,15 +10,15 @@ import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
  *
  * @author Todd Fast
  */
-public class V003 extends AbstractCassandraMutation {
+public class M201502011225_UpdateTableTest_1111 extends AbstractCassandraMutation {
 
 	/**
 	 *
 	 *
 	 */
-	public V003(Session session) {
+	public M201502011225_UpdateTableTest_1111(Session session) {
 		super(session);
-		state=new SimpleState<String>("003");
+        state = new SimpleState<String>("201502011225");
 	}
 
 
@@ -55,7 +54,7 @@ public class V003 extends AbstractCassandraMutation {
 	}
 	@Override
 	protected String getRessourceName(){
-		return "V003";
+        return "M201502011225";
 	}
 
 	private State<String> state;

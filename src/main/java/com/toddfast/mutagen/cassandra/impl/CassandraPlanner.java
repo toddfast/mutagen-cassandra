@@ -38,23 +38,42 @@ public class CassandraPlanner extends BasicPlanner<String> {
         List<Mutation<String>> result = new ArrayList<Mutation<String>>();
 
         for (String resource : resources) {
+            //check name of script file
+            if (!validate(resource)) {
+                System.out.println("script:(" + resource + ") is wrong named!\n");
+                throw new IllegalArgumentException("wrong name for " +
+                        "mutation resource \"" + resource + "\"");
+            }
             // Allow .sql files because some editors have syntax highlighting
             // for SQL but not CQL
-            if (resource.endsWith(".cql") || resource.endsWith(".sql")) {
+            if (resource.endsWith(".cqlsh.txt") || resource.endsWith(".sql")) {
                 result.add(
                         new CQLMutation(session, resource));
             }
             else if (resource.endsWith(".class")) {
                 result.add(
                         loadMutationClass(session, resource));
+            } else if (resource.endsWith(".java")) {
+                // ignore java file
+                System.out.println("It is a java file.");
+            } else {
+                throw new IllegalArgumentException("Unknown type for " +
+                        "mutation resource \"" + resource + "\"");
             }
-//            else {
-//                throw new IllegalArgumentException("Unknown type for " +
-//                        "mutation resource \"" + resource + "\"");
-//            }
         }
 
         return result;
+    }
+
+    /**
+     * validation for scirpt file name
+     */
+    private static boolean validate(String resource) {
+        String pattern = "^M(\\d{12})_([a-zA-z]+)_(\\d{4})\\.((java)|(cqlsh\\.txt))$"; // convention of script file
+        String fileSeparator = "/"; // file separator
+        String resourceName = resource.substring(resource.lastIndexOf(fileSeparator) + 1);
+
+        return resourceName.matches(pattern);
     }
 
     /**
@@ -63,7 +82,6 @@ public class CassandraPlanner extends BasicPlanner<String> {
 	 */
     private static Mutation<String> loadMutationClass(
             Session session, String resource) {
-
         assert resource.endsWith(".class") : "Class resource name \"" + resource + "\" should end with .class";
 
         int index = resource.indexOf(".class");

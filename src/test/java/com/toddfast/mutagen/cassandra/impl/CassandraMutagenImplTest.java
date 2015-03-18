@@ -85,7 +85,7 @@ public class CassandraMutagenImplTest {
         // Check for completion and errors
         assertTrue(result.isMutationComplete());
         assertNull(result.getException());
-        assertEquals((state != null ? state.getID() : "000000000000" ), "004");
+        assertEquals((state != null ? state.getID() : "000000000000"), "201502011230");
         
         
         
@@ -106,6 +106,7 @@ public class CassandraMutagenImplTest {
         assertEquals("bar", row3.getString("value1"));
         assertEquals("baz", row3.getString("value2"));
     }
+
 
     // //////////////////////////////////////////////////////////////////////////
     // Fields
