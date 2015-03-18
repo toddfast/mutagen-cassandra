@@ -28,7 +28,7 @@ public class CassandraSubject implements Subject<String> {
         }
 
         this.session = session;
-        this.version = null;
+        this.version = "000000000000";
     }
 
     /**
@@ -72,7 +72,7 @@ public class CassandraSubject implements Subject<String> {
 	 */
     @Override
     public State<String> getCurrentState() {
-        if (version == null) {
+        if (version == "000000000000") {
             ResultSet results = null;
             try {
                 results = getVersionRecord();
@@ -99,22 +99,12 @@ public class CassandraSubject implements Subject<String> {
                     version = versionid;
             }
         }
-        version = version == null ? "000000000000" : version;
         return new SimpleState<String>(version);
     }
 
     // //////////////////////////////////////////////////////////////////////////
     // Fields
     // //////////////////////////////////////////////////////////////////////////
-
-    // public static final ColumnFamily<String,String> VERSION_CF=
-    // ColumnFamily.newColumnFamily(
-    // "schema_version",
-    // StringSerializer.get(),
-    // StringSerializer.get(),
-    // ByteBufferSerializer.get());
-    // public static final String ROW_KEY="state";
-    // public static final String VERSION_COLUMN="version";
 
     private Session session; // session
 

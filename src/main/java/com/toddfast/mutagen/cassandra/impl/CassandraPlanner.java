@@ -69,7 +69,8 @@ public class CassandraPlanner extends BasicPlanner<String> {
      * validation for scirpt file name
      */
     private static boolean validate(String resource) {
-        String pattern = "^M(\\d{12})_([a-zA-z]+)_(\\d{4})\\.((java)|(cqlsh\\.txt))$"; // convention of script file
+        String pattern = "^M(\\d{12})_([a-zA-z]+)_(\\d{4})\\.((java)|(class)|(cqlsh\\.txt))$"; // convention of script
+                                                                                               // file
         String fileSeparator = "/"; // file separator
         String resourceName = resource.substring(resource.lastIndexOf(fileSeparator) + 1);
 
@@ -77,9 +78,9 @@ public class CassandraPlanner extends BasicPlanner<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+    *
+    *
+    */
     private static Mutation<String> loadMutationClass(
             Session session, String resource) {
         assert resource.endsWith(".class") : "Class resource name \"" + resource + "\" should end with .class";

@@ -161,63 +161,6 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         // append version record
         appendVersionRecord(version, getRessourceName(), checksum, (int) execution_time, success);
 
-        // TAF: Why does this fail with a StaleLockException? Do we need to use a
-        // separate lock table?
-
-        // // Attempt to acquire a lock to update the version
-        // ColumnPrefixDistributedRowLock<String> lock =
-        // new ColumnPrefixDistributedRowLock<String>(getKeyspace(),
-        // CassandraSubject.VERSION_CF,CassandraSubject.VERSION_COLUMN)
-        // .withBackoff(new BoundedExponentialBackoff(250, 10000, 10))
-        // .expireLockAfter(1, TimeUnit.SECONDS)
-        // // .failOnStaleLock(false);
-        // .failOnStaleLock(true);
-        //
-        // try {
-        // lock.acquire();
-        // }
-        // catch (StaleLockException e) {
-        // // Won't happen
-        // throw new MutagenException("Could not update "+
-        // "\"schema_version\" column family to state "+version+
-        // " because lock expired",e);
-        // }
-        // catch (BusyLockException e) {
-        // throw new MutagenException("Could not update "+
-        // "\"schema_version\" column family to state "+version+
-        // " because another client is updating the recorded version",e);
-        // }
-        // catch (Exception e) {
-        // if (e instanceof RuntimeException) {
-        // throw (RuntimeException)e;
-        // }
-        // else {
-        // throw new MutagenException("Could not update "+
-        // "\"schema_version\" column family to state "+version+
-        // " because a write lock could not be obtained",e);
-        // }
-        // }
-        // finally {
-        // try {
-        // MutationBatch batch=getKeyspace().prepareMutationBatch();
-        // batch.withRow(CassandraSubject.VERSION_CF,
-        // CassandraSubject.ROW_KEY)
-        // .putColumn(CassandraSubject.VERSION_COLUMN,version);
-        //
-        // // Release and update
-        // lock.releaseWithMutation(batch);
-        // }
-        // catch (Exception e) {
-        // if (e instanceof RuntimeException) {
-        // throw (RuntimeException)e;
-        // }
-        // else {
-        // throw new MutagenException("Could not update "+
-        // "\"schema_version\" column family to state "+version+
-        // "; schema is now out of sync with recorded version",e);
-        // }
-        // }
-        // }
     }
 
     /**

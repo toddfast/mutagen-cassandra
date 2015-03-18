@@ -51,12 +51,6 @@ public class CassandraCoordinator implements Coordinator<String> {
     // Fields
     // //////////////////////////////////////////////////////////////////////////
 
-    // public static final ColumnFamily<String,String> VERSION_CF=
-    // ColumnFamily.newColumnFamily(
-    // "schema_version",
-    // StringSerializer.get(),
-    // StringSerializer.get());
-
     private Session session;
 
 }
