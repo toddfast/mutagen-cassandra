@@ -140,15 +140,20 @@ public class CassandraMutagenImplTest {
                 success
                 ));
     }
+
+    private void dropTableTest() {
+        String dropStatement = "DROP TABLE \"Test1\";";
+        session.execute(dropStatement);
+    }
     @Test
     public void testExecutionFiles() throws Exception {
         createVersionSchemaTable();
-        appendOneVersionRecord("201502011201", "M201502011223_DoSomeThing_1111.cqlsh.txt", "checksum", 112, true);
+        appendOneVersionRecord("201502011200", "M201502011200_DoSomeThing_1111.cqlsh.txt", "checksum", 112, true);
+        dropTableTest();
         
         List<String> mutations = new ArrayList<String>();
         // Execute mutations
         Plan.Result<String> result = mutate();
-
         // Check the results
         for (Mutation mutation : result.getCompletedMutations()) {
             AbstractCassandraMutation m = (AbstractCassandraMutation) mutation;
