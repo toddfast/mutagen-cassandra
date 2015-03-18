@@ -47,7 +47,7 @@ public class CassandraSubject implements Subject<String> {
         // createstatement
         String createStatement = "CREATE TABLE \"" +
                 versionSchemaTable +
-                "\"( versionid bigint, filename varchar,checksum varchar,"
+                "\"( versionid varchar, filename varchar,checksum varchar,"
                 + "execution_date timestamp,execution_time int,"
                 + "success boolean, PRIMARY KEY(versionid))";
 
