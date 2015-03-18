@@ -48,10 +48,10 @@ public class CassandraPlanner extends BasicPlanner<String> {
                 result.add(
                         loadMutationClass(session, resource));
             }
-            else {
-                throw new IllegalArgumentException("Unknown type for " +
-                        "mutation resource \"" + resource + "\"");
-            }
+//            else {
+//                throw new IllegalArgumentException("Unknown type for " +
+//                        "mutation resource \"" + resource + "\"");
+//            }
         }
 
         return result;

@@ -25,41 +25,7 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
  * @author Todd Fast
  */
 public class CassandraMutagenImplTest {
-    //
-    // @BeforeClass
-    // public static void setUpClass()
-    // throws Exception {
-    // createKeyspace(session);
-    // }
-    private static void createKeyspace(Session session) {
-        session.execute("DROP KEYSPACE " + keyspace);
-        System.out.println("Creating keyspace " + keyspace + "...");
-        String createKeyspace = "CREATE KEYSPACE apispark WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };";
-        session.execute(createKeyspace);
-        System.out.println("Created keyspace " + keyspace);
 
-        // bind session to keyspace
-        session.execute("use " + keyspace + ";");
-        System.out.println("the current keyspace:" + session.getLoggedKeyspace());
-
-    }
-
-    // @AfterClass
-    // public static void tearDownClass()
-    // throws Exception {
-    // session.execute("DROP KEYSPACE " + keyspace);
-    // System.out.println("Dropped keyspace : "+keyspace);
-    // }
-    //
-    //
-    // @Before
-    // public void setUp() {
-    // }
-    //
-    //
-    // @After
-    // public void tearDown() {
-    // }
 
     /**
      * This is it!
@@ -82,31 +48,7 @@ public class CassandraMutagenImplTest {
         return result;
     }
 
-    /**
-	 *
-	 *
-	 */
-    @Test
-    public void testInitialize() throws Exception {
 
-        Plan.Result<String> result = mutate();
-
-        // Check the results
-        State<Integer> state = result.getLastState();
-
-        System.out.println("Mutation complete: " + result.isMutationComplete());
-        System.out.println("Exception: " + result.getException());
-        if (result.getException() != null) {
-            result.getException().printStackTrace();
-        }
-        System.out.println("Completed mutations: " + result.getCompletedMutations());
-        System.out.println("Remining mutations: " + result.getRemainingMutations());
-        System.out.println("Last state: " + (state != null ? state.getID() : "null"));
-
-        assertTrue(result.isMutationComplete());
-        assertNull(result.getException());
-        assertEquals((state != null ? state.getID() : (Integer) (-1)), (Integer) 4);
-    }
 
     /**
 	 *
@@ -124,7 +66,30 @@ public class CassandraMutagenImplTest {
     @Test
     public void testData() throws Exception {
 
-        // prepare
+        //Execute mutations
+        Plan.Result<String> result = mutate();
+
+        // Check the results
+        State<Integer> state = result.getLastState();
+
+        System.out.println("Mutation complete: " + result.isMutationComplete());
+        System.out.println("Exception: " + result.getException());
+        if (result.getException() != null) {
+            result.getException().printStackTrace();
+        }
+        System.out.println("Completed mutations: " + result.getCompletedMutations());
+        System.out.println("Remining mutations: " + result.getRemainingMutations());
+        System.out.println("Last state: " + (state != null ? state.getID() : "null"));
+
+        
+        // Check for completion and errors
+        assertTrue(result.isMutationComplete());
+        assertNull(result.getException());
+        assertEquals((state != null ? state.getID() : "000000000000" ), "004");
+        
+        
+        
+        // Check database content
         ResultSet results1 = query("row1");
         Row row1 = results1.one();
         assertEquals("foo", row1.getString("value1"));

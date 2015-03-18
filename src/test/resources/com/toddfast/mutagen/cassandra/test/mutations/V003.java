@@ -19,12 +19,12 @@ public class V003 extends AbstractCassandraMutation {
 	 */
 	public V003(Session session) {
 		super(session);
-		state=new SimpleState<Integer>(3);
+		state=new SimpleState<String>("003");
 	}
 
 
 	@Override
-	public State<Integer> getResultingState() {
+	public State<String> getResultingState() {
 		return state;
 	}
 
@@ -58,5 +58,5 @@ public class V003 extends AbstractCassandraMutation {
 		return "V003";
 	}
 
-	private State<Integer> state;
+	private State<String> state;
 }
