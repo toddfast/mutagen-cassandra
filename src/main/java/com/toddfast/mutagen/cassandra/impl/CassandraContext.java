@@ -16,7 +16,7 @@ public class CassandraContext implements Mutation.Context {
     /**
      * constructor for CassandraContext.
      * 
-     * @param subjet
+     * @param subject
      *            cassandra subject.
      * @param coordinator
      *            cassandra coordinator.
@@ -30,6 +30,12 @@ public class CassandraContext implements Mutation.Context {
     /**
      * another constructor for CassandraContext with a logger indicated.
      * 
+     * @param subject
+     *            the cassandra subject
+     * @param coordinator
+     *            the cassandra coordinator
+     * @param logger
+     *            the logger to print infomation
      */
     public CassandraContext(Subject<?> subject, Coordinator<?> coordinator,
             Logger logger) {
@@ -42,7 +48,7 @@ public class CassandraContext implements Mutation.Context {
     /**
      * a getter method to get subject.
      *
-     * @return
+     * @return subject
      */
     @Override
     public Subject<?> getSubject() {
@@ -52,7 +58,7 @@ public class CassandraContext implements Mutation.Context {
     /**
      * a getter method to get coordinator.
      *
-     * @return
+     * @return coordinator
      */
     @Override
     public Coordinator<?> getCoordinator() {

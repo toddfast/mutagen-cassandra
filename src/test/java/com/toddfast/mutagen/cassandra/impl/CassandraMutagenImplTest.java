@@ -56,9 +56,11 @@ public class CassandraMutagenImplTest {
 
 
     /**
-	 *
-	 *
-	 */
+     * @param values
+     *            the values to be binded for a query
+     * @return
+     *         the result set of a query
+     */
     public ResultSet query(Object... values) {
         String columnFamily = "Test1";
         // query

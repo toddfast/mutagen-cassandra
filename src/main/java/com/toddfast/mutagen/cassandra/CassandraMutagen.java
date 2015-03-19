@@ -15,6 +15,8 @@ public interface CassandraMutagen {
      * 
      * @param rootResourcePath
      *            the path where the scripts files(.cqlsh.txt and .java) are located.
+     * @throws IOException
+     *             IO Exception
      */
     public void initialize(String rootResourcePath)
             throws IOException;

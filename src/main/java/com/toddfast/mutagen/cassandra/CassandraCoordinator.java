@@ -32,7 +32,7 @@ public class CassandraCoordinator implements Coordinator<String> {
     /**
      * A getter method to get session.
      *
-     * @return
+     * @return session
      */
     public Session getSession() {
         return session;
@@ -42,6 +42,7 @@ public class CassandraCoordinator implements Coordinator<String> {
      * Return if the timestamp of state is greater than the current database timestamp.
      * 
      * @return
+     *         true or false
      */
     @Override
     public boolean accept(Subject<String> subject,

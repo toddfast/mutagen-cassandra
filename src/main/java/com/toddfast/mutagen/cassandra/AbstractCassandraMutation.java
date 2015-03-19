@@ -102,14 +102,14 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     /**
      * Override to perform the actual mutation.
      * 
+     * @param context
+     *            Logs to {@link System.out} and {@link System.err}
      */
     protected abstract void performMutation(Context context);
 
     /**
      * Override to return the result state of a resource after mutation.
      * 
-     * @param context
-     *            Logs to {@link System.out} and {@link System.err}
      */
     @Override
     public abstract State<String> getResultingState();
@@ -199,7 +199,9 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * Generate the MD5 hash for a key.
      * 
      * @param key
+     *            the string to be hashed.
      * @return
+     *         the MD5 hash for the key.
      */
     public static byte[] md5(String key) {
         MessageDigest algorithm;
@@ -222,10 +224,12 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     }
 
     /**
-     * 
+     * change the hash of a key into hexadecimal format
      * 
      * @param key
+     *            the string to be hashed.
      * @return
+     *         the hexadecimal format of hash of a key.
      */
     public static String md5String(String key) {
         byte[] messageDigest = md5(key);
@@ -236,7 +240,9 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * Encode a byte array as a hexadecimal string
      * 
      * @param bytes
+     *            byte array
      * @return
+     *         hexadecimal format for the byte array
      */
     public static String toHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();

@@ -71,7 +71,7 @@ public class CassandraMutagenImpl implements CassandraMutagen {
     /**
      * Return the resources founded.
      *
-     * @return
+     * @return resources
      */
     public List<String> getResources() {
         return resources;

@@ -115,6 +115,8 @@ public class CQLMutation extends AbstractCassandraMutation {
      * 
      * @param path
      *            resource path
+     * @throws IOException
+     *             IO Exception
      * @return
      *         the content of resource
      *
@@ -159,6 +161,8 @@ public class CQLMutation extends AbstractCassandraMutation {
      * 
      * @param input
      *            inputstream for resource.
+     * @throws IOException
+     *             IO Exception.
      * @return
      *         the content of resource.
      *
@@ -185,7 +189,7 @@ public class CQLMutation extends AbstractCassandraMutation {
     /**
      * Get the state after mutation.
      *
-     * @return
+     * @return state
      */
     @Override
     public State<String> getResultingState() {

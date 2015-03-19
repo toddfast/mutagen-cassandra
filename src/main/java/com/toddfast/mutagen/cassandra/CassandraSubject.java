@@ -41,7 +41,7 @@ public class CassandraSubject implements Subject<String> {
     /**
      * a getter method to get session.
      * 
-     * @return
+     * @return session
      */
     public Session getSession() {
         return session;
@@ -81,6 +81,7 @@ public class CassandraSubject implements Subject<String> {
      * Get the current timestamp in the database.
      * 
      * @return
+     *         the current timestamp in the database.
      */
     @Override
     public State<String> getCurrentState() {
