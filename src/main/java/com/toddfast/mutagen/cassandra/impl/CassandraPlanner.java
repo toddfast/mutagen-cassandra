@@ -15,30 +15,41 @@ import com.toddfast.mutagen.Subject;
 import com.toddfast.mutagen.basic.BasicPlanner;
 
 /**
- * 
- * @author Todd Fast
+ * Generates cassandra migration plans using the initial list of mutations and
+ * the specified subject and coordinator.
  */
 public class CassandraPlanner extends BasicPlanner<String> {
 
     /**
-	 *
-	 *
-	 */
+     * Constructor for cassandraPlanner.
+     * 
+     * @param session
+     *            the session to execute cql statements.
+     * @param mutationResources
+     *            script files to migrate.
+     *
+     */
     protected CassandraPlanner(Session session,
             List<String> mutationResources) {
         super(loadMutations(session, mutationResources), null);
     }
 
     /**
-	 *
-	 *
-	 */
+     * A static method to load mutation for script file(.cqlsh.txt and .java).
+     * 
+     * @param session
+     *            the session to execute cql statements.
+     * @param resources
+     *            script files to mutate.
+     * @return
+     *         list of mutation objects.
+     */
     private static List<Mutation<String>> loadMutations(
             Session session, Collection<String> resources) {
         List<Mutation<String>> result = new ArrayList<Mutation<String>>();
 
         for (String resource : resources) {
-            //check name of script file
+            // check name of script file
             if (!validate(resource)) {
                 System.out.println("script:(" + resource + ") is wrong named!\n");
                 throw new IllegalArgumentException("wrong name for " +
@@ -66,7 +77,11 @@ public class CassandraPlanner extends BasicPlanner<String> {
     }
 
     /**
-     * validation for scirpt file name
+     * validate if the script file is well named(
+     * M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt or
+     * M<DATETIME>_<Camel case title>_<ISSUE>.java)
+     * 
+     * @return
      */
     private static boolean validate(String resource) {
         String pattern = "^M(\\d{12})_([a-zA-z]+)_(\\d{4})\\.((java)|(class)|(cqlsh\\.txt))$"; // convention of script
@@ -78,9 +93,11 @@ public class CassandraPlanner extends BasicPlanner<String> {
     }
 
     /**
-    *
-    *
-    */
+     * a static method to generate the mutation for script file end with .class
+     *
+     * @return
+     *         mutation for script file end with .class
+     */
     private static Mutation<String> loadMutationClass(
             Session session, String resource) {
         assert resource.endsWith(".class") : "Class resource name \"" + resource + "\" should end with .class";
@@ -140,9 +157,11 @@ public class CassandraPlanner extends BasicPlanner<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+     * generate mutation context to execute mutations.
+     *
+     * @return
+     *         mutation context
+     */
     @Override
     protected Mutation.Context createContext(Subject<String> subject,
             Coordinator<String> coordinator) {
@@ -150,9 +169,12 @@ public class CassandraPlanner extends BasicPlanner<String> {
     }
 
     /**
-	 *
-	 * 
-	 */
+     * generate cassandra migration plan for
+     * mutating the target subject through a sequence of states.
+     * 
+     * @return
+     *         mutation plan.
+     */
     @Override
     public Plan<String> getPlan(Subject<String> subject,
             Coordinator<String> coordinator) {

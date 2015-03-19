@@ -14,22 +14,29 @@ import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.basic.SimpleState;
 
 /**
+ * Base class for cassandra mutation.
+ * An {@link Mutation} implementation for cassandra.
+ * Represents a single change that can be made to a resource,identified
+ * unambiguously by a state.
  * 
- * @author Todd Fast
  */
 public abstract class AbstractCassandraMutation implements Mutation<String> {
     /**
-	 *
-	 */
+     * Constructor for AbstractCassandraMutation.
+     * 
+     * @param session
+     *            the session to execute cql statement
+     */
     protected AbstractCassandraMutation(Session session) {
         super();
         this.session = session;
     }
 
     /**
-	 *
-	 *
-	 */
+     * Get the string of mutation state.
+     * 
+     * @return string representing the mutation state.
+     */
     @Override
     public String toString() {
         if (getResultingState() != null) {
@@ -41,9 +48,16 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+     * Returns the state of a resource.
+     * The state represents the datetime of the resource with the name convention:<br>
+     * M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt<br>
+     * M<DATETIME>_<Camel case title>_<ISSUE>.java<br>
+     * 
+     * @param resourceName
+     *            the name of resource.
+     * @return
+     *         the state of a resource.
+     */
     protected final State<String> parseVersion(String resourceName) {
         String versionString = resourceName;
         int index = versionString.lastIndexOf(fileSeparator);
@@ -77,47 +91,65 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+     * A getter method for session.
+     *
+     * @return
+     */
     protected Session getSession() {
         return session;
     }
 
     /**
-     * Perform the actual mutation
+     * Override to perform the actual mutation.
      * 
      */
     protected abstract void performMutation(Context context);
 
     /**
-	 *
-	 *
-	 */
+     * Override to return the result state of a resource after mutation.
+     * 
+     * @param context
+     *            Logs to {@link System.out} and {@link System.err}
+     */
     @Override
     public abstract State<String> getResultingState();
 
     /**
-     * Return a canonical representative of the change in string form
+     * Override to return a canonical representative of the change in string form.
+     * 
+     * @return
      * 
      */
     protected abstract String getChangeSummary();
 
     /**
-     * get the ressource name
+     * Override to get the name of resource.
+     * 
+     * @return
      */
     protected abstract String getRessourceName();
 
     /**
-     * append the version record
+     * append the version record in the table Version.
+     * 
+     * @param version
+     *            Id of version record,usually represented by the datetime.
+     * @param filename
+     *            name of script file that was executed.
+     * @param checksum
+     *            checksum for validation.
+     * @param execution_time
+     *            The execution time(ms) for this script file.
+     * @param success
+     *            represents if this execution successes.
      */
     protected void appendVersionRecord(String version, String filename, String checksum, int execution_time,
             boolean success) {
-        // insert version record
+        // insert statement for version record
         String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
                 + "execution_date,execution_time,success) "
                 + "VALUES (?,?,?,?,?,?);";
-
+        // prepare statement
         PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
         session.execute(preparedInsertStatement.bind(version,
                 filename,
@@ -129,7 +161,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     }
 
     /**
-     * Performs the actual mutation and then updates the recorded schema version
+     * Performs the actual mutation and then updates the recorded schema version.
      * 
      */
     @Override
@@ -155,7 +187,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         if (change == null) {
             change = "";
         }
-
+        // caculate the checksum
         String checksum = md5String(change);
 
         // append version record
@@ -164,7 +196,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     }
 
     /**
-     * 
+     * Generate the MD5 hash for a key.
      * 
      * @param key
      * @return
@@ -231,6 +263,6 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
 
     private Session session; // session
 
-    private String versionSchemaTable = "Version";
+    private String versionSchemaTable = "Version"; // version table name
 
 }

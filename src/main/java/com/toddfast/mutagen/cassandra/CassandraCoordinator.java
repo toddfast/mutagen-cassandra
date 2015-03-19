@@ -6,16 +6,19 @@ import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
 
 /**
+ * An implementation of {@link Coordinator} that accepts all states
+ * Whose timestamp is greater than the current database timestamp.
+ * It acts as a filter.
  * 
- * 
- * @author Todd Fast
  */
 public class CassandraCoordinator implements Coordinator<String> {
 
     /**
-	 * 
-	 * 
-	 */
+     * Constructor for cassandra coordinator.
+     * 
+     * @param session
+     *            the session to execute cql statements
+     */
     public CassandraCoordinator(Session session) {
         super();
         if (session == null) {
@@ -27,23 +30,23 @@ public class CassandraCoordinator implements Coordinator<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+     * A getter method to get session.
+     *
+     * @return
+     */
     public Session getSession() {
         return session;
     }
 
     /**
-	 * 
-	 * 
-	 */
-
+     * Return if the timestamp of state is greater than the current database timestamp.
+     * 
+     * @return
+     */
     @Override
     public boolean accept(Subject<String> subject,
             State<String> targetState) {
         State<String> currentState = subject.getCurrentState();
-        System.out.println("currentstate:" + currentState.getID());
         return (targetState.getID().compareTo(currentState.getID()) > 0);
     }
 
@@ -51,6 +54,6 @@ public class CassandraCoordinator implements Coordinator<String> {
     // Fields
     // //////////////////////////////////////////////////////////////////////////
 
-    private Session session;
+    private Session session; // session
 
 }

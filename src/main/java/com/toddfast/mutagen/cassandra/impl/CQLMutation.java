@@ -16,15 +16,18 @@ import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
 
 /**
- * 
- * @author Todd Fast
+ * Generate the mutation for the script file end with cqlsh.txt.
  */
 public class CQLMutation extends AbstractCassandraMutation {
 
     /**
-	 * 
-	 * 
-	 */
+     * constructor for CQLMutation.
+     * 
+     * @param session
+     *            the session to execute cql statements.
+     * @param resourceName
+     *            name of script file end with cqlsh.txt.
+     */
     public CQLMutation(Session session, String resourceName) {
         super(session);
         state = super.parseVersion(resourceName);
@@ -34,25 +37,33 @@ public class CQLMutation extends AbstractCassandraMutation {
     }
 
     /**
-	 *
-	 *
-	 */
+     * Get the change after mutation.
+     *
+     * @return
+     */
     @Override
     protected String getChangeSummary() {
         return source;
     }
 
+    /**
+     * Get the ressource name.
+     * 
+     * @return
+     */
     @Override
     protected String getRessourceName() {
         return ressource;
     }
 
     /**
-	 *
-	 *
-	 */
+     * Divide the script file end with .cqlsh.txt into statements.
+     * 
+     * @param resourceName
+     *            name of script file end with .cqlsh.txt
+     *
+     */
     private void loadCQLStatements(String resourceName) {
-
         try {
             source = loadResource(resourceName);
         } catch (IOException e) {
@@ -100,9 +111,14 @@ public class CQLMutation extends AbstractCassandraMutation {
     }
 
     /**
-	 *
-	 *
-	 */
+     * load resource by path.
+     * 
+     * @param path
+     *            resource path
+     * @return
+     *         the content of resource
+     *
+     */
     public String loadResource(String path)
             throws IOException {
 
@@ -139,9 +155,14 @@ public class CQLMutation extends AbstractCassandraMutation {
     }
 
     /**
-	 *
-	 *
-	 */
+     * Load the resource by inputstream.
+     * 
+     * @param input
+     *            inputstream for resource.
+     * @return
+     *         the content of resource.
+     *
+     */
     public String loadResource(InputStream input)
             throws IOException {
 
@@ -162,18 +183,19 @@ public class CQLMutation extends AbstractCassandraMutation {
     }
 
     /**
-	 *
-	 *
-	 */
+     * Get the state after mutation.
+     *
+     * @return
+     */
     @Override
     public State<String> getResultingState() {
         return state;
     }
 
     /**
-	 *
-	 *
-	 */
+     * Performs the mutation using the cassandra context.
+     *
+     */
     @Override
     protected void performMutation(Context context) {
         context.debug("Executing mutation {}", state.getID());

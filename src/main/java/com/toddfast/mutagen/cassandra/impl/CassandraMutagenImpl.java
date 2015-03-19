@@ -17,17 +17,17 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.CassandraSubject;
 
 /**
- * 
- * 
- * @author Todd Fast
+ * An implementation for cassandraMutagen.
+ * It execute all the migration tasks.
+ * It is the enter point of application.
  */
-// @ServiceProvider(scope=Scope.CLIENT_MANAGED)
 public class CassandraMutagenImpl implements CassandraMutagen {
 
     /**
-	 * 
-	 * 
-	 */
+     * Search the resources(script files) in the path indicated,
+     * sort them according their datetime, save them.
+     * 
+     */
     @Override
     public void initialize(String rootResourcePath)
             throws IOException {
@@ -43,11 +43,11 @@ public class CassandraMutagenImpl implements CassandraMutagen {
                 throw new IllegalArgumentException("Could not find resources " +
                         "on path \"" + rootResourcePath + "\"");
             }
-
+            // Sort the resources with the comparator
             Collections.sort(discoveredResources, COMPARATOR);
 
+            // Clean the resources
             resources = new ArrayList<String>();
-
             for (String resource : discoveredResources) {
                 System.out.println("Found mutation resource \"" + resource + "\"");
 
@@ -60,7 +60,6 @@ public class CassandraMutagenImpl implements CassandraMutagen {
                         continue;
                     }
                 }
-
                 resources.add(resource);
             }
         } catch (URISyntaxException e) {
@@ -70,17 +69,20 @@ public class CassandraMutagenImpl implements CassandraMutagen {
     }
 
     /**
-	 *
-	 *
-	 */
+     * Return the resources founded.
+     *
+     * @return
+     */
     public List<String> getResources() {
         return resources;
     }
 
     /**
-	 *
-	 *
-	 */
+     * Performs the automatic migration tasks.
+     * 
+     * @return
+     *         the results of migration.
+     */
     @Override
     public Plan.Result<String> mutate(Session session) {
         // Do this in a VM-wide critical section. External cluster-wide

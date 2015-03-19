@@ -10,23 +10,27 @@ import com.toddfast.mutagen.Subject;
 /**
  * Implements the basic contract of {@link Mutation.Context}. Logs to SLF4J.
  * 
- * @author Todd Fast
  */
 public class CassandraContext implements Mutation.Context {
 
     /**
-	 *
-	 *
-	 */
+     * constructor for CassandraContext.
+     * 
+     * @param subjet
+     *            cassandra subject.
+     * @param coordinator
+     *            cassandra coordinator.
+     *
+     */
     public CassandraContext(Subject<?> subject, Coordinator<?> coordinator) {
         this(subject, coordinator,
                 LoggerFactory.getLogger(CassandraContext.class));
     }
 
     /**
-	 *
-	 *
-	 */
+     * another constructor for CassandraContext with a logger indicated.
+     * 
+     */
     public CassandraContext(Subject<?> subject, Coordinator<?> coordinator,
             Logger logger) {
         super();
@@ -36,45 +40,47 @@ public class CassandraContext implements Mutation.Context {
     }
 
     /**
-	 *
-	 *
-	 */
+     * a getter method to get subject.
+     *
+     * @return
+     */
     @Override
     public Subject<?> getSubject() {
         return subject;
     }
 
     /**
-	 *
-	 *
-	 */
+     * a getter method to get coordinator.
+     *
+     * @return
+     */
     @Override
     public Coordinator<?> getCoordinator() {
         return coordinator;
     }
 
     /**
-	 *
-	 *
-	 */
+     * print the important information in the console.
+     *
+     */
     @Override
     public void info(String message, Object... parameters) {
         logger.info(message, parameters);
     }
 
     /**
-	 *
-	 *
-	 */
+     * print the debug information in the console.
+     *
+     */
     @Override
     public void debug(String message, Object... parameters) {
         logger.debug(message, parameters);
     }
 
     /**
-	 *
-	 *
-	 */
+     * print the error information in the console.
+     *
+     */
     @Override
     public void error(String message, Object... parameters) {
         logger.error(message, parameters);

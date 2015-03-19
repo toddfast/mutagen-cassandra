@@ -11,15 +11,22 @@ import com.toddfast.mutagen.Subject;
 import com.toddfast.mutagen.basic.SimpleState;
 
 /**
+ * Cassandra subject represents the table Version.
+ * It executes the tasks related with the table version: <br>
+ * create version table <br>
+ * query version table <br>
+ * get the current datebase timestamp in the version table<br>
  * 
- * @author Todd Fast
  */
 public class CassandraSubject implements Subject<String> {
 
     /**
-	 *
-	 *
-	 */
+     * Constructor for cassandraSubjet.
+     * 
+     * @param session
+     *            the session to execute cql statements.
+     *
+     */
     public CassandraSubject(Session session) {
         super();
         if (session == null) {
@@ -32,15 +39,16 @@ public class CassandraSubject implements Subject<String> {
     }
 
     /**
-	 *
-	 *
-	 */
+     * a getter method to get session.
+     * 
+     * @return
+     */
     public Session getSession() {
         return session;
     }
 
     /**
-     * create version table
+     * Create table Version.
      * 
      */
     public void createSchemaVersionTable() {
@@ -55,7 +63,10 @@ public class CassandraSubject implements Subject<String> {
     }
 
     /**
-     * get current version record
+     * Execute query in the table Version.
+     * 
+     * @return
+     *         all the records in version table.
      */
 
     public ResultSet getVersionRecord() {
@@ -67,9 +78,10 @@ public class CassandraSubject implements Subject<String> {
     }
 
     /**
-	 * 
-	 * 
-	 */
+     * Get the current timestamp in the database.
+     * 
+     * @return
+     */
     @Override
     public State<String> getCurrentState() {
         if (version == "000000000000") {
