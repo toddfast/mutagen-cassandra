@@ -21,14 +21,14 @@ Mutations can be either declarative CQL2/3 or Java classes that use whatever Cas
 The root package name should be the same for both, and the mutation file names should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
 
 The name convention for mutation:
--M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt
--M<DATETIME>_<Camel case title>_<ISSUE>.java
+- M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt
+- M<DATETIME>_<Camel case title>_<ISSUE>.java
 
 Examples:
 - M201502011200_RemoveStrategyLoad_2627.cqlsh.txt
 - M201502011201_RemoveStrategyLoad_2627.java
 
-Lastly,you should put the `.cqlsh.txt` files and `.java` files under the same source roots.Mutagen will compile the java file in .class file. 
+Lastly,you should put the `.cqlsh.txt` files and `.java` files under the same source roots. Mutagen will compile the `.java` file into `.class` file. 
 
 ### 3. Mutate!
 
@@ -64,11 +64,11 @@ catch (MutagenException e) {
 }
 ````
 
-At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. You can just create an instance using: `new CassandraMutageImpl()`.
+At runtime (normally during app startup), get or create an instance of `CassandraMutagen`. You can just create an instance by simply using: `new CassandraMutageImpl()`.
 
 Call `CassandraMutagen.initialize()` and provide the package name containing your mutations. You should see log messages listing all the resources that were found.
 
-Obtain an Datastax `Session` instance. Mutagen Cassandra use the Datastax Cassandra client, and requires a configured `Session` instance to work. This should obviously be straightforward if you already use Datastax. If not, please see the [Session documentation](http://www.datastax.com/drivers/java/2.0/com/datastax/driver/core/Session.html).
+Obtain an Datastax `Session` instance. Mutagen Cassandra use the Datastax Cassandra client, and requires a configured `Session` instance to work. This should obviously be straightforward if you already use Datastax cassandra driver. If not, please see the [Session documentation](http://www.datastax.com/drivers/java/2.0/com/datastax/driver/core/Session.html).
 
 To perform the mutations, call `CassandraMutagen.mutate(session);` to update the Cassandra schema to the latest version. Please note, **this method may not throw an exception if there is a problem.** Instead, use the returned value of type `Plan.Result<Integer>` to check for any exceptions thrown during the process. This may change in the future, so it would be prudent to surround your call to `mutate()` with a `try...catch` for `MutagenException`.
 
@@ -83,7 +83,7 @@ For examples of using Mutagen Cassandra, see the unit tests. To run the tests, y
 
 Note that the unit test mixes declarative CQL mutations with a Java mutation (`M201502011225_UpdateTableTest_1111.java`).
 
-PS:in our unit tests, we use the `Achilles`(https://github.com/doanduyhai/Achilles),it comes along with a junit rule to start an embedded cassandra server in memory and bootstrap the framework.It can create the session easily(https://github.com/doanduyhai/Achilles/wiki/Unit-testing).
+PS : in our unit tests, we use the cassandra manager `Achilles`(https://github.com/doanduyhai/Achilles), it comes along with a junit rule to start an embedded cassandra server in memory and bootstrap the framework. It can create the session easily(https://github.com/doanduyhai/Achilles/wiki/Unit-testing).
 ```
 public AchillesResource resource = AchillesResourceBuilder
             .noEntityPackages().withKeyspaceName(keyspace).build();
@@ -107,7 +107,7 @@ Although it's best practice to always use Mutagen to mutate your schema, it's po
 
 However, it then becomes your responsibility to be sure that all instances of the schema (for example, between dev, test, and production) apply the same manual changes, which is sort of the point of using Mutagen in the first place!
 
-It might instead make sense to create mutations reflecting the manual changes, but then manually update the `version` column (it's an `string`)in the `state` row of the `Version` column family to prevent those mutations from being applied. That way, if you ever recreate the schema, every change will be there.
+It might instead make sense to create mutations reflecting the manual changes, but then manually update the `versionid` column (it's an `string`)in the `Version` column family to prevent those mutations from being applied. That way, if you ever recreate the schema, every change will be there.
 
 ### CQL mutations
 
