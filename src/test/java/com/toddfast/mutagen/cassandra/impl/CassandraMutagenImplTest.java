@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.datastax.driver.core.BoundStatement;
@@ -34,7 +33,10 @@ public class CassandraMutagenImplTest {
 
 
     /**
-     * This is it!
+     * Get an instance of cassandra mutagen and mutate the mutations.
+     * 
+     * @return
+     *         the result of mutations.
      * 
      */
     private Plan.Result<String> mutate()
@@ -71,6 +73,12 @@ public class CassandraMutagenImplTest {
     }
 
     @Test
+    /**
+     * Firstly,This test execute mutations.
+     * Then it check the results of mutations.
+     * It also checks for database content to verify if the mutations is well done.
+     * @throws Exception
+     */
     public void testData() throws Exception {
 
         //Execute mutations
@@ -148,6 +156,13 @@ public class CassandraMutagenImplTest {
         session.execute(dropStatement);
     }
     @Test
+    /**
+     * This test tests if the mutation are well done when there are already records in the table Version.
+     * We insert a record with the timestamp 201502011200.
+     * The script files with timestamp greater than 201502011200 should be executed.
+     * The script files with timestamp not greater than 201502011200 should not be executed.
+     * @throws Exception
+     */
     public void testExecutionFiles() throws Exception {
         createVersionSchemaTable();
         appendOneVersionRecord("201502011200", "M201502011200_DoSomeThing_1111.cqlsh.txt", "checksum", 112, true);
@@ -175,7 +190,10 @@ public class CassandraMutagenImplTest {
 
     private String versionSchemaTable = "Version";
 
-    @Rule
+    /**
+     * Using the achilles to create session for test.
+     * 
+     */
     public AchillesResource resource = AchillesResourceBuilder
             .noEntityPackages().withKeyspaceName(keyspace).build();
 
