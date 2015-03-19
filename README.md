@@ -21,8 +21,8 @@ Mutations can be either declarative CQL2/3 or Java classes that use whatever Cas
 The root package name should be the same for both, and the mutation file names should start with a **version tag**--a prefix that orders the files naturally with a zero-padded integer.  (Anything following the version tag is just a comment for your own use; the verion tag ends with the first non-numeric character.)
 
 The name convention for mutation:
-- M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt
-- M<DATETIME>_<Camel case title>_<ISSUE>.java
+- `M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt`
+- `M<DATETIME>_<Camel case title>_<ISSUE>.java`
 
 Examples:
 - M201502011200_RemoveStrategyLoad_2627.cqlsh.txt
