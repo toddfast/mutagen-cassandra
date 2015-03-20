@@ -4,15 +4,20 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
+import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
-import com.toddfast.mutagen.basic.BasicPlanner;
+import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
+import com.toddfast.mutagen.cassandra.CassandraSubject;
 
 /**
  * Generates cassandra migration plans using the initial list of mutations and
@@ -27,7 +32,7 @@ public class CassandraPlanner extends BasicPlanner<String> {
      *            the session to execute cql statements.
      * @param mutationResources
      *            script files to migrate.
-     *
+     * 
      */
     protected CassandraPlanner(Session session,
             List<String> mutationResources) {
@@ -73,7 +78,27 @@ public class CassandraPlanner extends BasicPlanner<String> {
             }
         }
 
+        checkForDuplicateRessourceState(result);
+
         return result;
+    }
+
+    private static void checkForDuplicateRessourceState(List<Mutation<String>> mutations) {
+
+        // store all states as string
+        List<String> states = new ArrayList<String>();
+
+        for (Mutation<String> m : mutations) {
+            states.add(m.getResultingState().getID());
+        }
+
+        // create set from states list to get unicity.
+        Set<String> set = new HashSet<String>(states);
+
+        // if sizes differ there's a duplicate
+        if (set.size() < states.size())
+            throw new MutagenException("Two migration scripts possess the same state");
+
     }
 
     /**
@@ -85,7 +110,7 @@ public class CassandraPlanner extends BasicPlanner<String> {
      */
     private static boolean validate(String resource) {
         String pattern = "^M(\\d{12})_([a-zA-z]+)_(\\d{4})\\.((java)|(class)|(cqlsh\\.txt))$"; // convention of script
-                                                                                               // file
+        // file
         String fileSeparator = "/"; // file separator
         String resourceName = resource.substring(resource.lastIndexOf(fileSeparator) + 1);
 
@@ -94,7 +119,7 @@ public class CassandraPlanner extends BasicPlanner<String> {
 
     /**
      * a static method to generate the mutation for script file end with .class
-     *
+     * 
      * @return
      *         mutation for script file end with .class
      */
@@ -158,7 +183,7 @@ public class CassandraPlanner extends BasicPlanner<String> {
 
     /**
      * generate mutation context to execute mutations.
-     *
+     * 
      * @return
      *         mutation context
      */
@@ -178,6 +203,28 @@ public class CassandraPlanner extends BasicPlanner<String> {
     @Override
     public Plan<String> getPlan(Subject<String> subject,
             Coordinator<String> coordinator) {
-        return super.getPlan(subject, coordinator);
+
+        List<Mutation<String>> subjectMutations =
+                new ArrayList<Mutation<String>>(getMutations());
+
+        // Filter out the mutations that are unacceptable to the subject
+        for (Iterator<Mutation<String>> i = subjectMutations.iterator(); i.hasNext();) {
+
+            Mutation<String> mutation = i.next();
+            State<String> targetState = mutation.getResultingState();
+
+            if (!coordinator.accept(subject, targetState)) {
+                if (((CassandraSubject) subject).isVersionIdPresent(targetState.getID())) {
+                                        
+                    if (((CassandraSubject) subject).isMutationHashCorrect(targetState.getID(),
+                            ((AbstractCassandraMutation) mutation).getChecksum()))
+                        i.remove();
+                    else
+                        throw new MutagenException("Checksum incorrect for already executed mutation : "
+                                + mutation.getResultingState());
+                }
+            }
+        }
+        return new BasicPlan(subject, coordinator, subjectMutations);
     }
 }

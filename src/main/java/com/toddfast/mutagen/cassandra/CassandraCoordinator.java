@@ -2,6 +2,7 @@ package com.toddfast.mutagen.cassandra;
 
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Coordinator;
+import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
 
@@ -31,7 +32,7 @@ public class CassandraCoordinator implements Coordinator<String> {
 
     /**
      * A getter method to get session.
-     *
+     * 
      * @return session
      */
     public Session getSession() {
@@ -47,8 +48,20 @@ public class CassandraCoordinator implements Coordinator<String> {
     @Override
     public boolean accept(Subject<String> subject,
             State<String> targetState) {
+
         State<String> currentState = subject.getCurrentState();
-        return (targetState.getID().compareTo(currentState.getID()) > 0);
+
+        if (targetState.getID().compareTo(currentState.getID()) > 0) {
+            return true;
+        }
+        else if (((CassandraSubject) subject).isVersionIdPresent(targetState.getID())) {
+            return false;
+        }
+        else {
+            throw new MutagenException(
+                    "Mutation has state (state=" + targetState.getID() + ")" + " inferior to current state (state="
+                            + currentState.getID() + ") but was not recorded in the database");
+        }
     }
 
     // //////////////////////////////////////////////////////////////////////////

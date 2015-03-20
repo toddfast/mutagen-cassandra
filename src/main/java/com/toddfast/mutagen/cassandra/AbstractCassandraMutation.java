@@ -183,16 +183,24 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
 
         String version = getResultingState().getID();
 
-        String change = getChangeSummary();
-        if (change == null) {
-            change = "";
-        }
         // caculate the checksum
-        String checksum = md5String(change);
+        String checksum = getChecksum();
 
         // append version record
         appendVersionRecord(version, getRessourceName(), checksum, (int) execution_time, success);
 
+    }
+
+    /**
+     * 
+     * @return the MD5 hash of the current mutation
+     */
+    public String getChecksum() {
+        String change = getChangeSummary();
+        if (change == null) {
+            change = "";
+        }
+        return md5String(change);
     }
 
     /**
