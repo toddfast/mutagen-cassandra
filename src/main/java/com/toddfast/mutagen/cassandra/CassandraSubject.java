@@ -98,6 +98,16 @@ public class CassandraSubject implements Subject<String> {
         return !getVersionRecordByVersionId(versionId).all().isEmpty();
     }
 
+    public boolean isMutationHashCorrect(String versionId, String hash) {
+        String selectStatement = "SELECT checksum FROM \"" +
+                versionSchemaTable + "\" WHERE versionid = '" + versionId + "'";
+        ResultSet result = session.execute(selectStatement);
+
+        String checksum = result.all().get(0).getString("checksum");
+
+        return (checksum.compareTo(hash) == 0);
+    }
+
     /**
      * Get the current timestamp in the database.
      * 
