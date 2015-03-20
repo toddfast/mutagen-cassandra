@@ -119,7 +119,7 @@ public abstract class AbstractTest {
     }
 
     protected void createVersionSchemaTable() {
-        String dropStatement = "DROP TABLE \"" + versionSchemaTable + "\";";
+        String dropStatement = "DROP TABLE IF EXISTS \"" + versionSchemaTable + "\";";
         session.execute(dropStatement);
         String createStatement = "CREATE TABLE \"" +
                 versionSchemaTable +
