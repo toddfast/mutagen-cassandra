@@ -1,4 +1,5 @@
-package com.toddfast.mutagen.cassandra.test.mutations;
+package temp;
+
 
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.MutagenException;
@@ -11,7 +12,7 @@ import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
  * It is a script file java.
  * It is just for test.
  */
-public class M201502011225_UpdateTableTest_1111 extends AbstractCassandraMutation {
+public class M201502011225_UpdateTableTest extends AbstractCassandraMutation {
 
     /**
      * Constructor for the test.
@@ -19,7 +20,7 @@ public class M201502011225_UpdateTableTest_1111 extends AbstractCassandraMutatio
      * @param session
      *            the session to execute cql statements.
      */
-    public M201502011225_UpdateTableTest_1111(Session session) {
+    public M201502011225_UpdateTableTest(Session session) {
         super(session);
         state = new SimpleState<String>("201502011225");
     }

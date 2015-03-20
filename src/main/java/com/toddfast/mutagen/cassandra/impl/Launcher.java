@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Plan.Result;
 import com.toddfast.mutagen.State;
@@ -35,7 +36,7 @@ public class Launcher {
         Cluster cluster = null;
         Session session = null;
         String clusterContactPoint, clusterPort, useCredentials, dbuser, dbpassword, keyspace;
-        // someTests();
+
         if ((propertiesFilePath = System.getProperty("mutagenCassandra.properties.file")) == null) {
             System.err.println("please provide VM argument \"mutagenCassandra.properties.file\"");
             System.exit(1);
@@ -49,7 +50,7 @@ public class Launcher {
             prop.load(input);
 
             // get cluster builder
-            Cluster.Builder clusterBuilder = Cluster.builder();
+            Cluster.Builder clusterBuilder = Cluster.builder().withProtocolVersion(ProtocolVersion.V2);
 
             // set contact point
             if ((clusterContactPoint = getUsedProperty(prop, "clusterContactPoint")) != null)
