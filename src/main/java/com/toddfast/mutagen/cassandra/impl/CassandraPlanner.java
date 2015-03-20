@@ -91,6 +91,8 @@ public class CassandraPlanner extends BasicPlanner<String> {
 
         // create set from states list to get unicity.
         Set<String> set = new HashSet<String>(states);
+
+        // if sizes differ there's a duplicate
         if (set.size() < states.size())
             throw new MutagenException("Two migration scripts possess the same state");
 
