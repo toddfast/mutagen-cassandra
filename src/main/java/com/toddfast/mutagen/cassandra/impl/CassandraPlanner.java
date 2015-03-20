@@ -4,7 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Coordinator;
@@ -73,7 +75,25 @@ public class CassandraPlanner extends BasicPlanner<String> {
             }
         }
 
+        checkForDuplicateRessourceState(result);
+
         return result;
+    }
+
+    private static void checkForDuplicateRessourceState(List<Mutation<String>> mutations) {
+
+        // store all states as string
+        List<String> states = new ArrayList<String>();
+
+        for (Mutation<String> m : mutations) {
+            states.add(m.getResultingState().getID());
+        }
+
+        // create set from states list to get unicity.
+        Set<String> set = new HashSet<String>(states);
+        if (set.size() < states.size())
+            throw new MutagenException("Two migration scripts possess the same state");
+
     }
 
     /**
