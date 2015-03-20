@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -23,35 +23,44 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 
 /**
  * 
- * @author Todd Fast
+ * Abstract test class.
  */
 public abstract class AbstractTest {
 
-    private static String keyspace = "apispark";
+    private static AchillesResource resource;
 
-    private String versionSchemaTable = "Version";
-
-    public Session session;
+    private static Session session;
 
     public Plan.Result<String> result;
-
     /**
      * Using the achilles to create session for test.
      * 
      */
-    @Before
-    public void setUp() {
-        AchillesResource resource = AchillesResourceBuilder
-                .noEntityPackages().withKeyspaceName(keyspace).build();
+    @BeforeClass
+    public static void setUp() {
+        // create keyspace and session
+        resource = AchillesResourceBuilder
+                .noEntityPackages().withKeyspaceName("apispark").build();
 
         session = resource.getNativeSession();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
+        // close the session and cluster
         session.close();
+        resource.getPersistenceManager().shutDown();
+        resource.getPersistenceManagerFactory().shutDown();
     }
 
+    /**
+     * initiation
+     */
+    protected void init() {
+        // drop version and test1
+        dropVersionSchemaTable();
+        dropTableTest();
+    }
     /**
      * Get an instance of cassandra mutagen and mutate the mutations.
      * 
@@ -75,10 +84,10 @@ public abstract class AbstractTest {
         result = mutagen.mutate(session);
     }
 
-    // CHECK
-
+    /**
+     * check if the mutations are successful.
+     */
     protected void checkMutationSuccessful() {
-
         System.out.println("Mutation complete: " + result.isMutationComplete());
         System.out.println("Exception: " + result.getException());
         if (result.getException() != null) {
@@ -86,13 +95,18 @@ public abstract class AbstractTest {
         }
         System.out.println("Completed mutations: " + result.getCompletedMutations());
         System.out.println("Remining mutations: " + result.getRemainingMutations());
-        // System.out.println("Last state: " + (state != null ? state.getID() : "null"));
 
         // Check for completion and errors
         assertTrue(result.isMutationComplete());
         assertNull(result.getException());
     }
 
+    /**
+     * check the last timestamp of migration.
+     * 
+     * @param expectedTimestamp
+     *            the expected timestamp.
+     */
     protected void checkLastTimestamp(String expectedTimestamp) {
         assertEquals(expectedTimestamp, result.getLastState().getID());
     }
@@ -113,27 +127,68 @@ public abstract class AbstractTest {
         return session.execute(boundSelectStatement);
     }
 
+    /**
+     * Get the query result by primary key.
+     * 
+     * @param pk
+     *            primary key.
+     * @return
+     *         the query result.
+     */
     protected Row getByPk(String pk) {
         ResultSet results = query(pk);
         return results.one();
     }
 
+    /**
+     * Create version schema table manually.
+     */
     protected void createVersionSchemaTable() {
-        String dropStatement = "DROP TABLE \"" + versionSchemaTable + "\";";
-        session.execute(dropStatement);
-        String createStatement = "CREATE TABLE \"" +
-                versionSchemaTable +
-                "\"( versionid varchar, filename varchar,checksum varchar,"
+        // create table version
+        String createStatement = "CREATE TABLE \"Version\""
+                + "( versionid varchar, filename varchar,checksum varchar,"
                 + "execution_date timestamp,execution_time int,"
                 + "success boolean, PRIMARY KEY(versionid))";
 
         session.execute(createStatement);
     }
 
+    /**
+     * Drop the version schema table.
+     */
+    protected void dropVersionSchemaTable() {
+        // drop table version
+        String dropStatement = "DROP TABLE IF EXISTS \"Version\";";
+        session.execute(dropStatement);
+    }
+    
+    /**
+     * drop the table test1.
+     * 
+     */
+    protected void dropTableTest() {
+        String dropStatement = "DROP TABLE IF EXISTS \"Test1\";";
+        session.execute(dropStatement);
+    }
+
+    /**
+     * add record in the version table.
+     * 
+     * @param version
+     *            version id.
+     * @param filename
+     *            script file name.
+     * @param checksum
+     *            md5 hashage for script file.
+     * @param execution_time
+     *            execution time(ms) for script file.
+     * @param success
+     *            if the execution of script file successes.
+     */
     protected void appendOneVersionRecord(String version, String filename, String checksum, int execution_time,
             boolean success) {
         // insert version record
-        String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
+        String insertStatement = "INSERT INTO \"Version\" (versionid,filename,checksum,"
                 + "execution_date,execution_time,success) "
                 + "VALUES (?,?,?,?,?,?);";
 
@@ -145,10 +200,5 @@ public abstract class AbstractTest {
                 execution_time,
                 success
                 ));
-    }
-
-    protected void dropTableTest() {
-        String dropStatement = "DROP TABLE \"Test1\";";
-        session.execute(dropStatement);
     }
 }
