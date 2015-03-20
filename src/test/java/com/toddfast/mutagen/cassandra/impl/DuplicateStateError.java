@@ -11,7 +11,7 @@ public class DuplicateStateError extends AbstractTest {
      */
     @Test(expected = MutagenException.class)
     public void test() {
-        mutate("mutation/tests/duplicatestate");
+        mutate("mutations/tests/duplicatestate");
         
     }
 
