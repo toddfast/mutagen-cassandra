@@ -25,7 +25,7 @@ public class CassandraSubject implements Subject<String> {
      * 
      * @param session
      *            the session to execute cql statements.
-     *
+     * 
      */
     public CassandraSubject(Session session) {
         super();
@@ -75,6 +75,27 @@ public class CassandraSubject implements Subject<String> {
                 versionSchemaTable + "\"" +
                 limit + ";";
         return session.execute(selectStatement);
+    }
+
+    /**
+     * Find record for a given versionId
+     * 
+     * @param versionId
+     * @return Result set with one row if versionId present, empty otherwise
+     */
+    public ResultSet getVersionRecordByVersionId(String versionId) {
+        String selectStatement = "SELECT * FROM \"" +
+                versionSchemaTable + "\" WHERE versionid = '" + versionId + "'";
+        return session.execute(selectStatement);
+    }
+
+    /**
+     * 
+     * @param versionId
+     * @return true if versionId is in the database
+     */
+    public boolean isVersionIdPresent(String versionId) {
+        return !getVersionRecordByVersionId(versionId).all().isEmpty();
     }
 
     /**
