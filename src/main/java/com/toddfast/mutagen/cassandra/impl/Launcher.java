@@ -3,12 +3,16 @@ package com.toddfast.mutagen.cassandra.impl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Plan.Result;
 import com.toddfast.mutagen.State;
+import com.toddfast.mutagen.basic.ResourceScanner;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 
 /*
@@ -17,7 +21,7 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 public class Launcher {
 
     // Look for mutation scripts in the following folder
-    private static final String RESSOURCE_PATH = "com/toddfast/mutagen/cassandra/test/mutations";
+    private static final String RESSOURCE_PATH = "com/toddfast/mutagen/cassandra/mutations";
 
     public static void main(String[] args) {
 
@@ -31,7 +35,7 @@ public class Launcher {
         Cluster cluster = null;
         Session session = null;
         String clusterContactPoint, clusterPort, useCredentials, dbuser, dbpassword, keyspace;
-
+        // someTests();
         if ((propertiesFilePath = System.getProperty("mutagenCassandra.properties.file")) == null) {
             System.err.println("please provide VM argument \"mutagenCassandra.properties.file\"");
             System.exit(1);
@@ -140,17 +144,17 @@ public class Launcher {
 
     private static void someTests() {
 
-        // ResourceScanner test = ResourceScanner.getInstance();
-        // try {
-        // List<String> res = test.getResources("com/toddfast/mutagen/cassandra/test/mutations/",
-        // Pattern.compile(".*"),null);
-        // for(String s : res){
-        // System.out.println(s);
-        // }
-        // } catch (URISyntaxException | IOException e1) {
-        // // TODO Auto-generated catch block
-        // e1.printStackTrace();
-        // }
-        // System.exit(0);
+        ResourceScanner test = ResourceScanner.getInstance();
+        try {
+            List<String> res = test.getResources(RESSOURCE_PATH,
+                    Pattern.compile(".*"), null);
+            for (String s : res) {
+                System.out.println(s);
+            }
+        } catch (URISyntaxException | IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        System.exit(0);
     }
 }
