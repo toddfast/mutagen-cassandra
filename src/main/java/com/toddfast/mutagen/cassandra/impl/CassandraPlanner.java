@@ -221,8 +221,8 @@ public class CassandraPlanner extends BasicPlanner<String> {
 
             if (!coordinator.accept(subject, targetState)) {
                 if (((CassandraSubject) subject).isVersionIdPresent(targetState.getID())) {
-                    System.out.println("Checksum for mutation is: "
-                            + ((AbstractCassandraMutation) mutation).getChecksum());
+                    // System.out.println("Checksum for mutation (state=" + targetState + ") is: "
+                    // + ((AbstractCassandraMutation) mutation).getChecksum());
                     if (((CassandraSubject) subject).isMutationHashCorrect(targetState.getID(),
                             ((AbstractCassandraMutation) mutation).getChecksum()))
                         i.remove();

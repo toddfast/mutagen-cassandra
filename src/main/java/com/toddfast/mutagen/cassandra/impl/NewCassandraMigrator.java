@@ -20,7 +20,6 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
-import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
 
 /**
@@ -69,9 +68,8 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
      *            The program arguments
      */
     public void run(String[] args) {
-        manualRun = true;
         initialize(KEYSPACE_APISPARK, args);
-        execute();
+        executeManual();
     }
 
     private void initialize(String keyspace, String[] args) {
@@ -84,54 +82,44 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
         // // TODO seems useless, no?
         // Map<String, String> map = new HashMap<String, String>();
         // PropertiesUtils.loadProperties(propertiesPath, map);
-        //
-        // for (String arg : args) {
-        // if ("--dry".equals(arg)) {
-        // dry = true;
-        // } else if ("-h".equals(arg) || "--help".equals(arg)) {
-        // printHelp();
-        // System.exit(0);
-        // } else {
-        // System.out.println("Unknown option: " + arg);
-        // printHelp();
-        // System.exit(1);
-        // }
-        // }
+
+        for (String arg : args) {
+            if ("--dry".equals(arg)) {
+                dry = true;
+            } else if ("-h".equals(arg) || "--help".equals(arg)) {
+                printHelp();
+                System.exit(0);
+            } else {
+                System.out.println("Unknown option: " + arg);
+                printHelp();
+                System.exit(1);
+            }
+        }
     }
 
-    public final void execute() {
-        // Create getSession() to hosts
-        if (manualRun) {
-            // cluster = DatastaxDriverUtils.createCluster();
-            // setScriptOnlySession(DatastaxDriverUtils.createSession(cluster, keyspace));
-        }
+    public final void executeManual() {
+
+        setScriptOnlySession(Launcher.launchConnection());
 
         try {
-            // Initialize output formatting strategy
-            migrate();
+            // mutate
+            // context should only be used for logging
+            performMutation(new CassandraContext(null, null));
         } finally {
-            if (manualRun) {
-                // getSession().close();
-                // cluster.close();
-            }
+
+            getSession().close();
+
         }
     }
 
     /**
      * Override to add migration code.
      */
-    protected abstract void migrate();
+    // protected abstract void migrate();
 
     // Called only by the mutagen framework
     @Override
-    protected void performMutation(Context context) {
-        try {
-            migrate();
-        } catch (Exception e) {
-            throw new MutagenException("Exception executing Java script : \"" + getRessourceName() + "\"", e);
-
-        }
-    }
+    protected abstract void performMutation(Context context);
 
     /**
      * Affiche l'aide de la commande.
@@ -285,20 +273,18 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     }
 
     @Override
-    protected String getRessourceName() {
+    protected String getResourceName() {
         return getClass().getName();
     }
 
     @Override
     public String getChecksum() {
         try {
-            System.err.println("there !!");
-             String ret = toHex(getDigestFromArray(getClassContents(this.getClass())));
-             System.out.println(ret);
+            String ret = toHex(getDigestFromArray(getClassContents(this.getClass())));
             return ret;
         } catch (IOException e) {
             e.printStackTrace();
-            return "trololo";
+            throw new RuntimeException("unable to get checksum");
         }
     }
 
@@ -311,20 +297,19 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
 
     public void setScriptOnlySession(Session scriptOnlySession) {
         this.scriptOnlySession = scriptOnlySession;
+        this.manualRun = true;
     }
 
     public static final byte[] getClassContents(Class<?> myClass) throws IOException {
         String path = myClass.getName().replace('.', '/');
         String fileName = new StringBuffer(path).append(".java").toString();
         InputStream is = myClass.getClassLoader().getResourceAsStream(fileName);
-        System.out.println("laclasse: " + fileName);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int datum = is.read();
         while (datum != -1) {
             buffer.write(datum);
             datum = is.read();
         }
-        System.out.println(buffer.size());
 
         is.close();
 
@@ -334,7 +319,7 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     public byte[] getDigestFromArray(byte[] array) {
         byte[] output = null;
         try {
-            MessageDigest  md = MessageDigest.getInstance("MD5");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(array);
             output = md.digest();
         } catch (NoSuchAlgorithmException e) {
