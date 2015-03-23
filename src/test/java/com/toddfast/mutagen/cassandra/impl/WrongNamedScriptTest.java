@@ -9,8 +9,6 @@ public class WrongNamedScriptTest extends AbstractTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void migration_with_wrong_named_script() {
-        // init
-        init();
 
         // Execute mutations
         mutate("mutations/tests/wrongNamedScript");

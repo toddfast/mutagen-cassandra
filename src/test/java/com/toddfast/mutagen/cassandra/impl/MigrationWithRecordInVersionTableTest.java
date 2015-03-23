@@ -23,8 +23,6 @@ public class MigrationWithRecordInVersionTableTest extends AbstractTest {
     // TODO
     @Test
     public void migration_with_record_version_table() {
-        // init
-        init();
 
         createVersionSchemaTable();
         // append two version record

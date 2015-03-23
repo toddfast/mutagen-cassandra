@@ -12,7 +12,8 @@ import org.junit.runners.Suite.SuiteClasses;
         UnexpectedNewMigrationTest.class,
         WrongNamedScriptTest.class,
         WrongCqlScriptFileTest.class,
-        WrongJavaScriptFileTest.class })
+        WrongJavaScriptFileTest.class,
+        ChecksumErrorTest.class })
 
 public class TestSuiteForAllTests {
     // test suite

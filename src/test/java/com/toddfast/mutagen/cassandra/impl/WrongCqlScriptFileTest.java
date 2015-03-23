@@ -10,8 +10,6 @@ public class WrongCqlScriptFileTest extends AbstractTest {
 
     @Test
     public void migration_with_wrong_cql_statements() {
-        // init
-        init();
 
         // Execute mutations
         mutate("mutations/tests/wrongCqlScript");

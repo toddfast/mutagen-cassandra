@@ -16,8 +16,6 @@ public class MigrationResultValidation extends AbstractTest {
      */
     @Test
     public void migration_with_no_version_table() {
-        // init
-        init();
 
         // Execute mutations
         mutate("mutations/tests/simple/cql");

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.junit.Before;
+
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
@@ -34,7 +36,8 @@ public abstract class AbstractTest {
     /**
      * initiation for test.
      */
-    protected void init() {
+    @Before
+    public void init() {
         // drop version and test1
         dropVersionSchemaTable();
         dropTableTest();

@@ -9,8 +9,6 @@ import com.toddfast.mutagen.MutagenException;
 public class WrongJavaScriptFileTest extends AbstractTest {
     @Test
     public void migration_with_wrong_java_cql_statements() {
-        // init
-        init();
 
         // Execute mutations
         mutate("mutations/tests/wrongJavaScript");

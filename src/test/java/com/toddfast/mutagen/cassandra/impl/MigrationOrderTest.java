@@ -15,8 +15,6 @@ public class MigrationOrderTest extends AbstractTest {
      */
     @Test
     public void migration_execution_order() {
-        // init
-        init();
 
         // Execute mutations
         mutate("mutations/tests/execution");
