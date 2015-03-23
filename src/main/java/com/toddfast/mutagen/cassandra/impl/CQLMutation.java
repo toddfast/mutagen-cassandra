@@ -13,7 +13,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.toddfast.mutagen.MutagenException;
-import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
 
 /**
@@ -31,7 +30,6 @@ public class CQLMutation extends AbstractCassandraMutation {
      */
     public CQLMutation(Session session, String resourceName) {
         super(session);
-        state = super.parseVersion(resourceName);
         this.ressource = resourceName.substring(resourceName
                 .lastIndexOf("/") + 1);
         loadCQLStatements(resourceName);
@@ -53,7 +51,7 @@ public class CQLMutation extends AbstractCassandraMutation {
      * @return
      */
     @Override
-    protected String getRessourceName() {
+    protected String getResourceName() {
         return ressource;
     }
 
@@ -187,15 +185,7 @@ public class CQLMutation extends AbstractCassandraMutation {
         return result;
     }
 
-    /**
-     * Get the state after mutation.
-     *
-     * @return state
-     */
-    @Override
-    public State<String> getResultingState() {
-        return state;
-    }
+
 
     /**
      * Performs the mutation using the cassandra context.
@@ -203,7 +193,7 @@ public class CQLMutation extends AbstractCassandraMutation {
      */
     @Override
     protected void performMutation(Context context) {
-        context.debug("Executing mutation {}", state.getID());
+        context.debug("Executing mutation {}", getResultingState().getID());
         for (String statement : statements) {
             context.debug("Executing CQL \"{}\"", statement);
             try {
@@ -221,7 +211,7 @@ public class CQLMutation extends AbstractCassandraMutation {
                         statement + "\"", e);
             }
         }
-        context.debug("Done executing mutation {}", state.getID());
+        context.debug("Done executing mutation {}", getResultingState().getID());
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -231,8 +221,6 @@ public class CQLMutation extends AbstractCassandraMutation {
     private String source;
 
     private String ressource;
-
-    private State<String> state;
 
     private List<String> statements = new ArrayList<String>();
 

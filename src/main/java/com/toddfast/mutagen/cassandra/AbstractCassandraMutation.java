@@ -30,6 +30,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     protected AbstractCassandraMutation(Session session) {
         super();
         this.session = session;
+        this.state = null;
     }
 
     /**
@@ -92,7 +93,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
 
     /**
      * A getter method for session.
-     *
+     * 
      * @return
      */
     protected Session getSession() {
@@ -108,12 +109,16 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     protected abstract void performMutation(Context context);
 
     /**
-     * Override to return the result state of a resource after mutation.
+     * Get the state after mutation.
      * 
+     * @return state
      */
     @Override
-    public State<String> getResultingState(){
-        return parseVersion(getRessourceName());
+    public State<String> getResultingState() {
+        if (state != null)
+            return state;
+        else
+            return state = parseVersion(getResourceName());
     }
 
     /**
@@ -129,7 +134,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * 
      * @return
      */
-    protected abstract String getRessourceName();
+    protected abstract String getResourceName();
 
     /**
      * append the version record in the table Version.
@@ -189,7 +194,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         String checksum = getChecksum();
 
         // append version record
-        appendVersionRecord(version, getRessourceName(), checksum, (int) execution_time, success);
+        appendVersionRecord(version, getResourceName(), checksum, (int) execution_time, success);
 
     }
 
@@ -280,5 +285,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     private Session session; // session
 
     private String versionSchemaTable = "Version"; // version table name
+
+    private State<String> state;
 
 }
