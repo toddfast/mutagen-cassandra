@@ -112,7 +112,9 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * 
      */
     @Override
-    public abstract State<String> getResultingState();
+    public State<String> getResultingState(){
+        return parseVersion(getRessourceName());
+    }
 
     /**
      * Override to return a canonical representative of the change in string form.
