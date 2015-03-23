@@ -38,7 +38,7 @@ public abstract class AbstractTest {
      */
     @Before
     public void init() {
-        // drop version and test1
+        // drop version and test1 for the new migration
         dropVersionSchemaTable();
         dropTableTest();
     }

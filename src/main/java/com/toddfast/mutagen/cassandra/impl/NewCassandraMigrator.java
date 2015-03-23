@@ -57,7 +57,6 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
 
     protected NewCassandraMigrator(Session session) {
         super(session);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -127,7 +126,6 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     @Override
     protected void performMutation(Context context) {
         try {
-
             migrate();
         } catch (Exception e) {
             throw new MutagenException("Exception executing Java script : \"" + getRessourceName() + "\"", e);
