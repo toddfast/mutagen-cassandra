@@ -1,0 +1,1 @@
+create table "Test2" (key varchar PRIMARY KEY,value1 varchar);
