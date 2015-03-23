@@ -83,6 +83,12 @@ public class CassandraPlanner extends BasicPlanner<String> {
         return result;
     }
 
+    /**
+     * Check if it exists two mutations which have the same state.
+     * 
+     * @param mutations
+     *            the list of mutations.
+     */
     private static void checkForDuplicateRessourceState(List<Mutation<String>> mutations) {
 
         // store all states as string
@@ -215,7 +221,8 @@ public class CassandraPlanner extends BasicPlanner<String> {
 
             if (!coordinator.accept(subject, targetState)) {
                 if (((CassandraSubject) subject).isVersionIdPresent(targetState.getID())) {
-                                        
+                    System.out.println("Checksum for mutation is: "
+                            + ((AbstractCassandraMutation) mutation).getChecksum());
                     if (((CassandraSubject) subject).isMutationHashCorrect(targetState.getID(),
                             ((AbstractCassandraMutation) mutation).getChecksum()))
                         i.remove();

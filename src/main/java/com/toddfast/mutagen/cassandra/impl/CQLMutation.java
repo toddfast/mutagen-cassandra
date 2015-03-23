@@ -11,6 +11,7 @@ import java.util.List;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
+import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
@@ -210,9 +211,13 @@ public class CQLMutation extends AbstractCassandraMutation {
                 ResultSet result = getSession().execute(statement);
                 context.info("Successfully executed CQL \"{}\" in {} attempts",
                         statement, result);
+            } catch (QueryValidationException e) {
+                context.error("Statement Validatation Exception executing CQL \"{}\"", statement, e);
+                throw new MutagenException("Statement Validation Exception executing CQL \"" +
+                        statement + "\"", e);
             } catch (QueryExecutionException e) {
-                context.error("Exception executing CQL \"{}\"", statement, e);
-                throw new MutagenException("Exception executing CQL \"" +
+                context.error("Statement Execution Exception executing CQL \"{}\"", statement, e);
+                throw new MutagenException("Statement Execution Exception executing CQL \"" +
                         statement + "\"", e);
             }
         }

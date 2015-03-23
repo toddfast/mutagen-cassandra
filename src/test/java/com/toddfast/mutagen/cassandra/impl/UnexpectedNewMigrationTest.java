@@ -12,6 +12,8 @@ public class UnexpectedNewMigrationTest extends AbstractTest {
      */
     @Test(expected = MutagenException.class)
     public void testAddedScriptWithInferiorState() {
+        // init
+        init();
 
         createVersionSchemaTable();
 

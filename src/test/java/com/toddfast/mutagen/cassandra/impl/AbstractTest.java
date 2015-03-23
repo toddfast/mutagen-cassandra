@@ -3,15 +3,11 @@ package com.toddfast.mutagen.cassandra.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import info.archinnov.achilles.junit.AchillesResource;
 import info.archinnov.achilles.junit.AchillesResourceBuilder;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -26,35 +22,17 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
  * Abstract test class.
  */
 public abstract class AbstractTest {
-
-    private static AchillesResource resource;
-
-    private static Session session;
-
-    public Plan.Result<String> result;
     /**
-     * Using the achilles to create session for test.
+     * Using the achilles to create a final global session for all tests.
      * 
      */
-    @BeforeClass
-    public static void setUp() {
-        // create keyspace and session
-        resource = AchillesResourceBuilder
-                .noEntityPackages().withKeyspaceName("apispark").build();
+    private static final Session session = AchillesResourceBuilder
+            .noEntityPackages().withKeyspaceName("apispark").build().getNativeSession();
 
-        session = resource.getNativeSession();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        // close the session and cluster
-        session.close();
-        resource.getPersistenceManager().shutDown();
-        resource.getPersistenceManagerFactory().shutDown();
-    }
+    public Plan.Result<String> result;
 
     /**
-     * initiation
+     * initiation for test.
      */
     protected void init() {
         // drop version and test1

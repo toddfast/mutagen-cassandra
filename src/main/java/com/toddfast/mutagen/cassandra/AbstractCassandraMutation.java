@@ -175,7 +175,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
             performMutation(context);
         } catch (MutagenException e) {
             success = false;
-            e.printStackTrace();
+            throw e;
         }
         ;
         long endTime = System.currentTimeMillis();

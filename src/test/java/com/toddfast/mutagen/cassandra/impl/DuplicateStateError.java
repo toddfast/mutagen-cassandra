@@ -9,8 +9,12 @@ public class DuplicateStateError extends AbstractTest {
     /**
      * In case of duplicate states in filename, throws MutagenException
      */
+
     @Test(expected = MutagenException.class)
     public void test() {
+        // init
+        init();
+        // mutate
         mutate("mutations/tests/duplicatestate");
         
     }

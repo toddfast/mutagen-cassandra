@@ -90,6 +90,7 @@ public class CassandraSubject implements Subject<String> {
     }
 
     /**
+     * Check if the versionId exists in the database.
      * 
      * @param versionId
      * @return true if versionId is in the database
