@@ -20,7 +20,6 @@ public class MigrationWithRecordInVersionTableTest extends AbstractTest {
      * The script files with timestamp not greater than 201502011209 should not be executed.
      * 
      */
-    // TODO
     @Test
     public void migration_with_record_version_table() {
 

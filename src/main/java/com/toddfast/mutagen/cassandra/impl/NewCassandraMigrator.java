@@ -16,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
@@ -41,12 +40,7 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     private boolean dry;
 
     // Used only for manual execution.
-    private Cluster cluster;
-
     private Session scriptOnlySession;
-
-    private String keyspace;
-
     /**
      * Empty constructor used only for test class
      */

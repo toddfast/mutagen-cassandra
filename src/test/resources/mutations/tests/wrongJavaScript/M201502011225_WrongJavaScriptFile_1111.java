@@ -7,8 +7,8 @@ import com.toddfast.mutagen.cassandra.impl.NewCassandraMigrator;
 
 /**
  *
- * It is a script file java.
- * It is just for test.
+ * It is a script file java with wrong cql statements.
+ * 
  */
 public class M201502011225_WrongJavaScriptFile_1111 extends NewCassandraMigrator {
 
