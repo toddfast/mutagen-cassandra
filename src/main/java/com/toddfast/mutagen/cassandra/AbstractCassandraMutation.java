@@ -41,10 +41,10 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     @Override
     public String toString() {
         if (getResultingState() != null) {
-            return super.toString() + "[state=" + getResultingState().getID() + "]";
+            return getResourceName() + "[state=" + getResultingState().getID() + "]";
         }
         else {
-            return super.toString();
+            return getResourceName();
         }
     }
 

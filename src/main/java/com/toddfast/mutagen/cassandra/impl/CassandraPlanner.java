@@ -71,7 +71,6 @@ public class CassandraPlanner extends BasicPlanner<String> {
                         loadMutationClass(session, resource));
             } else if (resource.endsWith(".java")) {
                 // ignore java file
-                System.out.println("It is a java file.");
             } else {
                 throw new IllegalArgumentException("Unknown type for " +
                         "mutation resource \"" + resource + "\"");
