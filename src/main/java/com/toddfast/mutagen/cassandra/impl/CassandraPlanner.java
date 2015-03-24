@@ -219,8 +219,14 @@ public class CassandraPlanner extends BasicPlanner<String> {
             Mutation<String> mutation = i.next();
             State<String> targetState = mutation.getResultingState();
 
+            // Check by state first
             if (!coordinator.accept(subject, targetState)) {
+
+                // For older states, verify its presence in the database
                 if (((CassandraSubject) subject).isVersionIdPresent(targetState.getID())) {
+
+                    // Check that the md5 hash of the already executed mutation hasn't changed
+
                     // System.out.println("Checksum for mutation (state=" + targetState + ") is: "
                     // + ((AbstractCassandraMutation) mutation).getChecksum());
                     if (((CassandraSubject) subject).isMutationHashCorrect(targetState.getID(),
@@ -229,6 +235,12 @@ public class CassandraPlanner extends BasicPlanner<String> {
                     else
                         throw new MutagenException("Checksum incorrect for already executed mutation : "
                                 + mutation.getResultingState());
+                }
+                else {
+                    throw new MutagenException(
+                            "Mutation has state (state=" + targetState.getID() + ")"
+                                    + " inferior to current state (state="
+                                    + subject.getCurrentState().getID() + ") but was not recorded in the database");
                 }
             }
         }
