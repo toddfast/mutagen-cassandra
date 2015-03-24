@@ -8,6 +8,7 @@ import java.util.Properties;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Session;
+import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan.Result;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
@@ -62,8 +63,14 @@ public class Launcher {
         if (result.getException() != null) {
             result.getException().printStackTrace();
         }
-        System.out.println("Completed mutations: " + result.getCompletedMutations());
-        System.out.println("Remining mutations: " + result.getRemainingMutations());
+        System.out.println("Completed mutations: ");
+        for (Mutation<String> m : result.getCompletedMutations()) {
+            System.out.println("\t - " + m);
+        }
+        System.out.println("Remaining mutations: ");
+        for (Mutation<String> m : result.getRemainingMutations()) {
+            System.out.println("\t - " + m);
+        }
         System.out.println("Last state: " + (state != null ? state.getID() : "null"));
     }
     
