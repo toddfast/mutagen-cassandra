@@ -1,4 +1,4 @@
-package mutations.tests.checksum_error.java.d2;
+package mutations.tests.checksum_error.java.second;
 
 import com.toddfast.mutagen.cassandra.impl.NewCassandraMigrator;
 

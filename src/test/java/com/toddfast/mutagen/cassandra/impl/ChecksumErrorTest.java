@@ -34,7 +34,7 @@ public class ChecksumErrorTest extends AbstractTest {
 
         // Mutate again with file 2 (differs only by its package name), should throw error
         try {
-            mutate(RESOURCE_PATH + "/java/d2");
+            mutate(RESOURCE_PATH + "/java/second");
             Assert.fail("MutagenException expected!");
         } catch (MutagenException e) {
             // expected exception,it is OK
