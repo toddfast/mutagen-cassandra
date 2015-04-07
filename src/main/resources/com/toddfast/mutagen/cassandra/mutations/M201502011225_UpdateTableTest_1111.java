@@ -1,6 +1,5 @@
 package com.toddfast.mutagen.cassandra.mutations;
 
-import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.cassandra.impl.NewCassandraMigrator;
 
@@ -11,16 +10,6 @@ import com.toddfast.mutagen.cassandra.impl.NewCassandraMigrator;
  */
 public class M201502011225_UpdateTableTest_1111 extends NewCassandraMigrator {
 
-    /**
-     * Constructor for the test.
-     * 
-     * @param session
-     *            the session to execute cql statements.
-     */
-
-    public M201502011225_UpdateTableTest_1111(Session session) {
-        super(session);
-    }
 
     @Override
     protected void performMutation(Context context) {
@@ -36,6 +25,6 @@ public class M201502011225_UpdateTableTest_1111 extends NewCassandraMigrator {
     }
 
     public static void main(String[] args) {
-        new M201502011225_UpdateTableTest_1111(null).run(args);
+        new M201502011225_UpdateTableTest_1111().run(args);
     }
 }

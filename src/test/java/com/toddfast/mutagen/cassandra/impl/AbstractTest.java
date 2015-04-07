@@ -75,7 +75,7 @@ public abstract class AbstractTest {
             result.getException().printStackTrace();
         }
         System.out.println("Completed mutations: " + result.getCompletedMutations());
-        System.out.println("Remining mutations: " + result.getRemainingMutations());
+        System.out.println("Remaining mutations: " + result.getRemainingMutations());
 
         // Check for completion and errors
         assertTrue(result.isMutationComplete());
@@ -182,4 +182,9 @@ public abstract class AbstractTest {
                 success
                 ));
     }
+
+    public Plan.Result<String> getResult() {
+        return result;
+    }
+
 }

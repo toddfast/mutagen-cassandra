@@ -99,6 +99,19 @@ public class CassandraSubject implements Subject<String> {
         return !getVersionRecordByVersionId(versionId).all().isEmpty();
     }
 
+    public boolean isMutationFailed(String versionId) {
+        // get rows for given version id
+        List<Row> rows = getVersionRecordByVersionId(versionId).all();
+
+        // if there's one and only one row, and the mutation has failed
+        if (rows.size() == 1 && !rows.get(0).getBool("success")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public boolean isMutationHashCorrect(String versionId, String hash) {
         String selectStatement = "SELECT checksum FROM \"" +
                 versionSchemaTable + "\" WHERE versionid = '" + versionId + "'";
@@ -145,6 +158,17 @@ public class CassandraSubject implements Subject<String> {
         }
 
         return new SimpleState<String>(version);
+    }
+
+    private void printTable() {
+        ResultSet results = null;
+        results = getVersionRecord();
+        
+        List<Row> rows = results.all();
+        for (Row r : rows) {
+            System.out.println(r.toString());
+        }
+
     }
 
     // //////////////////////////////////////////////////////////////////////////

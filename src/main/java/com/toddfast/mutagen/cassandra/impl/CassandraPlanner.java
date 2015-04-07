@@ -237,6 +237,10 @@ public class CassandraPlanner extends BasicPlanner<String> {
                 }
 
             }
+            
+            //Test that the mutation hasn't been executed with errors before
+            if (((CassandraSubject) subject).isMutationFailed(targetState.getID()))
+                    throw new MutagenException("There is a failed mutation in database for script : " + mutation.toString());
         }
 
         return new BasicPlan(subject, coordinator, subjectMutations);

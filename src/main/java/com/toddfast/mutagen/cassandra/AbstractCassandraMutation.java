@@ -170,6 +170,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     public final void mutate(Context context)
             throws MutagenException {
 
+        MutagenException runtimeException = null;
         // Perform the mutation
         boolean success = true;
         long startTime = System.currentTimeMillis();
@@ -177,7 +178,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
             performMutation(context);
         } catch (MutagenException e) {
             success = false;
-            throw e;
+            runtimeException = e;
         }
 
 
@@ -191,6 +192,9 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
 
         // append version record
         appendVersionRecord(version, getResourceName(), checksum, (int) execution_time, success);
+
+        if (runtimeException != null)
+            throw runtimeException;
 
     }
 
