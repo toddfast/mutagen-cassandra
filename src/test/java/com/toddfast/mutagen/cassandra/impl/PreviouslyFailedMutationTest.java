@@ -19,11 +19,10 @@ public class PreviouslyFailedMutationTest extends AbstractTest {
         } catch (Exception e) {
 
         }
-        
+
         try {
             mutate("mutations/tests/failed_mutation");
             Assert.assertNotNull(getResult().getException());
-
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage().contains("There is a failed mutation in database for script "));
             e.printStackTrace();
