@@ -9,6 +9,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import com.toddfast.mutagen.MutagenException;
@@ -24,52 +26,34 @@ public class ChecksumErrorTest extends AbstractTest {
 
     private List<String> discoveredResources;
 
+    @Test
+    public void cqlChecksumError() throws Exception {
 
-    @Test(expected = MutagenException.class)
-    public void cqlChecksumError() {
-
-        try {
-
-            // Storing list of absolute paths for resources
-            discoveredResources =
-                    ResourceScanner.getInstance().getResources(
-                            RESOURCE_PATH + "/cql", Pattern.compile(".*"),
-                            getClass().getClassLoader());
-
-        } catch (URISyntaxException | IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+        // Storing list of absolute paths for resources
+        discoveredResources =
+                ResourceScanner.getInstance().getResources(
+                        RESOURCE_PATH + "/cql", Pattern.compile(".*"),
+                        getClass().getClassLoader());
 
         // if there's exactly one file in the folder
-        if (discoveredResources != null && discoveredResources.size() == 1) {
-
-
-            try {
-                writeToFile(discoveredResources.get(0), CONTENT_V1);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("Could not write to file");
-            }
-
-            // Execute mutation
-            mutate(RESOURCE_PATH + "/cql");
-
-            // Overwrite file
-            try {
-                writeToFile(discoveredResources.get(0), CONTENT_V2);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("Could not write to file");
-
-            }
-
-            // Mutate again to control, should throw error
-            mutate(RESOURCE_PATH + "/cql");
-
-        }
-        else {
+        if (discoveredResources == null || discoveredResources.size() != 1) {
             throw new RuntimeException("There should be exactly one file in " + RESOURCE_PATH);
+        }
+
+        writeToFile(discoveredResources.get(0), CONTENT_V1);
+
+        // Execute mutation
+        mutate(RESOURCE_PATH + "/cql");
+
+        // Overwrite file with different content
+        writeToFile(discoveredResources.get(0), CONTENT_V2);
+
+        // Mutate again to control, should throw error
+        try {
+            mutate(RESOURCE_PATH + "/cql");
+            Assert.fail("MutagenException expected!");
+        } catch (MutagenException e) {
+            // expected exception,it is OK
         }
 
     }
@@ -84,7 +68,6 @@ public class ChecksumErrorTest extends AbstractTest {
                     ResourceScanner.getInstance().getResources(
                             RESOURCE_PATH + "/java", Pattern.compile(".*"),
                             getClass().getClassLoader());
-
 
         } catch (URISyntaxException | IOException e1) {
             // TODO Auto-generated catch block

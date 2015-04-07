@@ -62,7 +62,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
     protected final State<String> parseVersion(String resourceName) {
         String versionString = resourceName;
         int index = versionString.lastIndexOf(fileSeparator);
-        if (index != -1) {
+        if (versionString.lastIndexOf(fileSeparator) != -1) {
             versionString = versionString.substring(index + 1);
         }
 
