@@ -38,9 +38,25 @@ public abstract class AbstractTest {
      */
     @Before
     public void init() {
-        // drop version and test1 for the new migration
-        dropVersionSchemaTable();
-        dropTableTest();
+        // purge all table from keyspace
+        purgeKeyspace();
+    }
+
+    private void purgeKeyspace() {
+
+        // get current keyspace
+        String keyspace = session.getLoggedKeyspace();
+
+        // list all tables of keyspace (equivalent to cqlsh DESCRIBE TABLES)
+        ResultSet rs = session
+                .execute("SELECT columnfamily_name FROM system.schema_columnfamilies where keyspace_name = '"
+                        + keyspace + "' ;");
+
+        // drop all tables
+        for (Row r : rs.all()){
+            String tablename = r.getString("columnfamily_name");
+            session.execute("DROP TABLE \"" + tablename + "\";");
+        }
     }
     /**
      * Get an instance of cassandra mutagen and mutate the mutations.
@@ -134,23 +150,6 @@ public abstract class AbstractTest {
         session.execute(createStatement);
     }
 
-    /**
-     * Drop the version schema table.
-     */
-    protected void dropVersionSchemaTable() {
-        // drop table version
-        String dropStatement = "DROP TABLE IF EXISTS \"Version\";";
-        session.execute(dropStatement);
-    }
-    
-    /**
-     * drop the table test1.
-     * 
-     */
-    protected void dropTableTest() {
-        String dropStatement = "DROP TABLE IF EXISTS \"Test1\";";
-        session.execute(dropStatement);
-    }
 
     /**
      * add record in the version table.

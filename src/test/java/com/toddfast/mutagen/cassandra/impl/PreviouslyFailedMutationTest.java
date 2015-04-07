@@ -13,8 +13,6 @@ public class PreviouslyFailedMutationTest extends AbstractTest {
     @Test
     public void failedMutationShouldThrowError() {
 
-        createVersionSchemaTable();
-
         try {
             mutate("mutations/tests/failed_mutation");
             Assert.assertNotNull(getResult().getException());
