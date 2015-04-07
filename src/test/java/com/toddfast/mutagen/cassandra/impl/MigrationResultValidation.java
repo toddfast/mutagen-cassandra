@@ -15,10 +15,29 @@ public class MigrationResultValidation extends AbstractTest {
      * 
      */
     @Test
-    public void migration_with_no_version_table() {
+    public void simple_cql_migration() {
 
         // Execute mutations
         mutate("mutations/tests/simple/cql");
+
+        // Check the results
+        checkMutationSuccessful();
+
+        // Check the last timestamp
+        checkLastTimestamp("201502011200");
+
+        // Check database content
+        // TODO
+        Row row1 = getByPk("row1");
+        assertNotNull(row1);
+        assertEquals("value1", row1.getString("value1"));
+    }
+
+    @Test
+    public void simple_java_migration() {
+
+        // Execute mutations
+        mutate("mutations/tests/simple/java");
 
         // Check the results
         checkMutationSuccessful();
