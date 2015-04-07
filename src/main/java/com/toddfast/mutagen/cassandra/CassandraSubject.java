@@ -139,7 +139,7 @@ public class CassandraSubject implements Subject<String> {
 
             for (Row r1 : rows) {
                 String versionid = r1.getString("versionid");
-                if (version.compareTo(versionid) < 0)
+                if (r1.getBool("success") == true && version.compareTo(versionid) < 0)
                     version = versionid;
             }
         }
