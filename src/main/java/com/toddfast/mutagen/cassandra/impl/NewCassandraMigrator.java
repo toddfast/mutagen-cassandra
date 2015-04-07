@@ -41,17 +41,14 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
 
     // Used only for manual execution.
     private Session scriptOnlySession;
-    /**
-     * Empty constructor used only for test class
-     */
-    public NewCassandraMigrator() {
-        super(null);
-    }
 
-    protected NewCassandraMigrator(Session session) {
+    public NewCassandraMigrator(Session session) {
         super(session);
     }
 
+    public NewCassandraMigrator() {
+        this(null);
+    }
     /**
      * Run the migration script with given program arguments. <br>
      * Run with <code>-h</code> argument to display help. <br>
@@ -260,15 +257,12 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
         return getSession().execute(boundStatement);
     }
 
-    @Override
-    protected String getChangeSummary() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
+    // return class name (with package hierarchy) and replace semicolons by "/" for correct version parsing
+    // if using semicolons package names ending with integers will be confused with mutation state
     protected String getResourceName() {
-        return getClass().getName();
+        return getClass().getName().replace(".", "/");
     }
 
     @Override
@@ -283,10 +277,13 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     }
 
     public Session getSession() {
-        if (manualRun)
+        if (manualRun) {
             return scriptOnlySession;
+        }
         else
+        {
             return super.getSession();
+        }
     }
 
     public void setScriptOnlySession(Session scriptOnlySession) {

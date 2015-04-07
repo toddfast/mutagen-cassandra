@@ -56,7 +56,6 @@ public class CassandraPlanner extends BasicPlanner<String> {
         for (String resource : resources) {
             // check name of script file
             if (!validate(resource)) {
-                System.out.println("script:(" + resource + ") is wrong named!\n");
                 throw new IllegalArgumentException("wrong name for " +
                         "mutation resource \"" + resource + "\"");
             }
@@ -150,23 +149,17 @@ public class CassandraPlanner extends BasicPlanner<String> {
             Constructor<?> constructor;
             Mutation<String> mutation = null;
             try {
-                // Try a constructor taking a session
-                constructor = clazz.getConstructor(Session.class);
-                mutation = (Mutation<String>) constructor.newInstance(session);
+                constructor = clazz.getConstructor();
+                mutation = (Mutation<String>) constructor.newInstance();
+
+                // Assumption that the mutation must extend AbstractCassandraMutation, then set session
+                ((AbstractCassandraMutation) mutation).setSession(session);
+
             } catch (NoSuchMethodException e) {
-                // Wrong assumption
+                throw new MutagenException("Could not find compatible " +
+                        "constructor for class \"" + className + "\"", e);
             }
 
-            if (mutation == null) {
-                // Try the null constructor
-                try {
-                    constructor = clazz.getConstructor();
-                    mutation = (Mutation<String>) constructor.newInstance();
-                } catch (NoSuchMethodException e) {
-                    throw new MutagenException("Could not find comparible " +
-                            "constructor for class \"" + className + "\"", e);
-                }
-            }
 
             return mutation;
         } catch (InstantiationException e) {
@@ -229,8 +222,9 @@ public class CassandraPlanner extends BasicPlanner<String> {
                     // System.out.println("Checksum for mutation (state=" + targetState + ") is: "
                     // + ((AbstractCassandraMutation) mutation).getChecksum());
                     if (((CassandraSubject) subject).isMutationHashCorrect(targetState.getID(),
-                            ((AbstractCassandraMutation) mutation).getChecksum()))
+                            ((AbstractCassandraMutation) mutation).getChecksum())) {
                         i.remove();
+                    }
                     else
                         throw new MutagenException("Checksum incorrect for already executed mutation : "
                                 + mutation.getResultingState());
@@ -241,8 +235,10 @@ public class CassandraPlanner extends BasicPlanner<String> {
                                     + " inferior to current state (state="
                                     + subject.getCurrentState().getID() + ") but was not recorded in the database");
                 }
+
             }
         }
+
         return new BasicPlan(subject, coordinator, subjectMutations);
     }
 }

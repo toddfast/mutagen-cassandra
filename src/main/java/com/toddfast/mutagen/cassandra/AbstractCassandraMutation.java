@@ -27,8 +27,8 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * @param session
      *            the session to execute cql statement
      */
-    protected AbstractCassandraMutation(Session session) {
-        super();
+    public AbstractCassandraMutation(Session session) {
+
         this.session = session;
         this.state = null;
     }
@@ -100,6 +100,9 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         return session;
     }
 
+    public void setSession(Session session) {
+        this.session = session;
+    }
     /**
      * Override to perform the actual mutation.
      * 
@@ -120,14 +123,6 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         else
             return state = parseVersion(getResourceName());
     }
-
-    /**
-     * Override to return a canonical representative of the change in string form.
-     * 
-     * @return
-     * 
-     */
-    protected abstract String getChangeSummary();
 
     /**
      * Override to get the name of resource.
@@ -184,7 +179,8 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
             success = false;
             throw e;
         }
-        ;
+
+
         long endTime = System.currentTimeMillis();
         long execution_time = endTime - startTime;
 
@@ -202,13 +198,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
      * 
      * @return the MD5 hash of the current mutation
      */
-    public String getChecksum() {
-        String change = getChangeSummary();
-        if (change == null) {
-            change = "";
-        }
-        return md5String(change);
-    }
+    public abstract String getChecksum();
 
     /**
      * Generate the MD5 hash for a key.
@@ -273,7 +263,7 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
 
         return hexString.toString();
     }
-
+    
     // //////////////////////////////////////////////////////////////////////////
     // Fields
     // //////////////////////////////////////////////////////////////////////////

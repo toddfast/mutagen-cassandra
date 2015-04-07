@@ -36,13 +36,22 @@ public class CQLMutation extends AbstractCassandraMutation {
     }
 
     /**
-     * Get the change after mutation.
-     *
+     * Get the source of the CQL script.
+     * 
+     * @return
+     */
+    protected String getSource() {
+        return source;
+    }
+
+    /**
+     * Return md5 hash of source
+     * 
      * @return
      */
     @Override
-    protected String getChangeSummary() {
-        return source;
+    public String getChecksum() {
+        return toHex(md5(getSource()));
     }
 
     /**
@@ -223,5 +232,6 @@ public class CQLMutation extends AbstractCassandraMutation {
     private String ressource;
 
     private List<String> statements = new ArrayList<String>();
+
 
 }

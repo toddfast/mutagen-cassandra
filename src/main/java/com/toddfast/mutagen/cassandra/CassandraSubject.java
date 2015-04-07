@@ -105,7 +105,7 @@ public class CassandraSubject implements Subject<String> {
         ResultSet result = session.execute(selectStatement);
 
         String checksum = result.all().get(0).getString("checksum");
-
+        System.out.println("hash1 : " + hash + " hashdb : " + checksum);
         return (checksum.compareTo(hash) == 0);
     }
 
@@ -137,12 +137,17 @@ public class CassandraSubject implements Subject<String> {
             }
 
             List<Row> rows = results.all();
+            System.out.println("result number " + rows.size());
 
             for (Row r1 : rows) {
                 String versionid = r1.getString("versionid");
+                System.out.println("versionid : " + versionid);
                 if (version.compareTo(versionid) < 0)
                     version = versionid;
             }
+        }
+        else {
+            System.out.println("not 0");
         }
         return new SimpleState<String>(version);
     }

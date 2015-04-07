@@ -12,17 +12,6 @@ public class M201502011225_UpdateTableTest_1111 extends NewCassandraMigrator {
 
 
 
-
-    /**
-     * Return a canonical representative of the change in string form
-     *
-     */
-    @Override
-    protected String getChangeSummary() {
-        return "update \"Test1\" set value1='chicken', value2='sneeze' " +
-                "where key='row2';";
-    }
-
     @Override
     protected void performMutation(Context context) {
         context.debug("Executing mutation {}", getResultingState().getID());
