@@ -35,4 +35,18 @@ public interface CassandraMutagen {
      * 
      */
     public void baseline(Session session, String lastCompletedState);
+
+    /**
+     * @param session
+     *            the session to execute cql statements, just one instance in the application.
+     * 
+     */
+    public void clean(Session session);
+
+    /**
+     * @param session
+     *            the session to execute cql statements, just one instance in the application.
+     * 
+     */
+    public void repair(Session session);
 }

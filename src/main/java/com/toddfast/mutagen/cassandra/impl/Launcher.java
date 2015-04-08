@@ -3,14 +3,10 @@ package com.toddfast.mutagen.cassandra.impl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ProtocolVersion;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan.Result;
@@ -29,17 +25,20 @@ public class Launcher {
 
         Session session = launchConnection();
 
+        // initialisation with resourcePath, necessary for mutate and baseline
+        CassandraMutagen mutagen = initialiseMutagen(RESOURCE_PATH);
+
         // Clean
-        // clean(session);
+        // mutagen.clean(session);
 
         // Repair
-        // repair(session);
+        // mutagen.repair(session);
 
         // Baseline
-        // baseline(session, RESOURCE_PATH, "201502011225");
+        // mutagen.baseline(session, RESOURCE_PATH, "201502011225");
 
-        // Perform mutations
-        performMutations(session, RESOURCE_PATH);
+        // Perform mutations and print result
+        printMutationResult(mutagen.mutate(session));
 
         // close session and cluster
         if (session != null) {
@@ -50,7 +49,8 @@ public class Launcher {
     }
 
     /*
-     * Execute mutations
+     * deprecated
+     * combine Initialise and Execute mutations
      */
     public static Result<String> performMutations(Session session, String resourcePath) throws IOException {
 
@@ -69,45 +69,7 @@ public class Launcher {
         return mutagen;
     }
 
-    public static void clean(Session session) {
-        System.out.println("Cleaning...");
-        // TRUNCATE instead of drop ?
-        session.execute("DROP TABLE IF EXISTS \"Version\";");
-        System.out.println("Done");
-    }
 
-    public static void repair(Session session) {
-        System.out.println("Repairing...");
-        ResultSet rs = session.execute("SELECT * FROM \"Version\";");
-        List<Row> selectedRows = new ArrayList<Row>();
-
-        while (!rs.isExhausted()) {
-            Row r = rs.one();
-            if (!r.getBool("success"))
-                selectedRows.add(r);
-        }
-        rs.all();
-        System.out.println(selectedRows.size() + " database entrie(s) have been selected for deletion : ");
-        for (Row r : selectedRows) {
-            System.out.println(" - " + r.toString());
-            session.execute("DELETE FROM \"Version\" WHERE versionid = '" + r.getString("versionid") + "';");
-        }
-        System.out.println("Done");
-
-    }
-
-    public static void baseline(Session session, String resourcePath, String lastCompletedState) throws IOException {
-
-        System.out.println("Baseline...");
-        CassandraMutagen mutagen = initialiseMutagen(resourcePath);
-
-        mutagen.baseline(session, lastCompletedState);
-
-        System.out.println("Done");
-
-        // TODO nice output
-
-    }
 
     // return Property value if exists and not empty
     private static String getUsedProperty(Properties prop, String name) {

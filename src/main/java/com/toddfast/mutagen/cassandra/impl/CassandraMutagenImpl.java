@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
@@ -112,6 +113,8 @@ public class CassandraMutagenImpl implements CassandraMutagen {
     @Override
     public void baseline(Session session, String lastCompletedState) {
 
+        System.out.println("Baseline...");
+
         synchronized (System.class) {
 
             CassandraCoordinator coordinator = new CassandraCoordinator(session);
@@ -140,6 +143,8 @@ public class CassandraMutagenImpl implements CassandraMutagen {
             }
 
         }
+        System.out.println("Done");
+
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -200,6 +205,37 @@ public class CassandraMutagenImpl implements CassandraMutagen {
                 }
             };
 
+    @Override
+    public void clean(Session session) {
+        System.out.println("Cleaning...");
+        // TRUNCATE instead of drop ?
+        session.execute("DROP TABLE IF EXISTS \"Version\";");
+        System.out.println("Done");
+
+    }
+
+    @Override
+    public void repair(Session session) {
+        System.out.println("Repairing...");
+        ResultSet rs = session.execute("SELECT * FROM \"Version\";");
+        List<Row> selectedRows = new ArrayList<Row>();
+
+        while (!rs.isExhausted()) {
+            Row r = rs.one();
+            if (!r.getBool("success"))
+                selectedRows.add(r);
+        }
+        rs.all();
+        System.out.println(selectedRows.size() + " database entrie(s) have been selected for deletion : ");
+        for (Row r : selectedRows) {
+            System.out.println(" - " + r.toString());
+            session.execute("DELETE FROM \"Version\" WHERE versionid = '" + r.getString("versionid") + "';");
+        }
+        System.out.println("Done");
+
+    }
+
     // @AllowField
     private List<String> resources;
+
 }

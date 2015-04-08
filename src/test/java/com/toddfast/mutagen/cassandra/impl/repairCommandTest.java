@@ -1,18 +1,23 @@
 package com.toddfast.mutagen.cassandra.impl;
 
+import java.io.IOException;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import com.datastax.driver.core.ResultSet;
+import com.toddfast.mutagen.cassandra.CassandraMutagen;
 
 public class repairCommandTest extends AbstractTest {
 
     @Test
-    public void testFailuresRemoved() {
+    public void testFailuresRemoved() throws IOException {
+
+        String resourcePath = "mutations/tests/failed_mutation";
 
         // mutate with failure
-        mutate("mutations/tests/failed_mutation");
+        mutate(resourcePath);
         Assert.assertNotNull(getResult().getException());
 
         // Make sure there was a recorded failure
@@ -26,8 +31,13 @@ public class repairCommandTest extends AbstractTest {
         
         Assert.assertTrue(mutationHasFailed);
 
+
+        // Instanciate new mutagen object
+        CassandraMutagen mutagen = new CassandraMutagenImpl();
+        mutagen.initialize(resourcePath);
+
         // Repair
-        Launcher.repair(getSession());
+        mutagen.repair(getSession());
 
         // make sure there's no failure in the database
         rs = getSession().execute("SELECT success FROM \"Version\"");
