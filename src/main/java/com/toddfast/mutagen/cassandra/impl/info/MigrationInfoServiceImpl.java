@@ -1,8 +1,8 @@
 package com.toddfast.mutagen.cassandra.impl.info;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import com.datastax.driver.core.ResultSet;
@@ -60,13 +60,10 @@ public class MigrationInfoServiceImpl implements MigrationInfoService {
      */
     public void setMigrations(ResultSet resultSet) {
         if (resultSet != null) {
-            List<Row> rowList = resultSet.all();
-            rowList.sort(COMPARATOR);
-            Iterator<Row> iterator = rowList.iterator();
-
-            while (iterator.hasNext()) {
-                migrationInfos.add(new MigrationInfoImpl(iterator.next()));
-            }
+            Row[] rows = resultSet.all().toArray(new Row[resultSet.all().size()]);
+            Arrays.sort(rows, COMPARATOR);
+            for (int i = 0; i < rows.length; i++)
+                migrationInfos.add(new MigrationInfoImpl(rows[i]));
         }
     }
 
