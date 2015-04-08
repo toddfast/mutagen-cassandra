@@ -8,10 +8,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.toddfast.mutagen.MutagenException;
+import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.Planner;
 import com.toddfast.mutagen.basic.ResourceScanner;
+import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
 import com.toddfast.mutagen.cassandra.CassandraCoordinator;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.CassandraSubject;
@@ -104,9 +108,44 @@ public class CassandraMutagenImpl implements CassandraMutagen {
         }
     }
 
+
+    @Override
+    public void baseline(Session session, String lastCompletedState) {
+
+        synchronized (System.class) {
+
+            CassandraCoordinator coordinator = new CassandraCoordinator(session);
+            CassandraSubject subject = new CassandraSubject(session);
+
+            // create Version table if not exists
+            subject.createSchemaVersionTable();
+
+            ResultSet rs = session.execute("SELECT * FROM \"Version\";");
+            if( !rs.isExhausted())
+                throw new MutagenException("Tabble Version is not empty, please clean before executing baseline");
+
+            Planner<String> planner =
+                    new CassandraPlanner(session, getResources());
+            Plan<String> plan = planner.getPlan(subject, coordinator);
+
+            // Dummy execution of all mutations with state inferior of equal to lastCompletedState
+            for (Mutation<String> m : plan.getMutations()) {
+
+                if (m.getResultingState().getID().compareTo(lastCompletedState) <= 0)
+                    try {
+                        ((AbstractCassandraMutation) m).dummyExecution();
+                    } catch (Exception e) {
+                        throw new MutagenException("Dummy execution failed for mutation : " + m.toString(), e);
+                    }
+            }
+
+        }
+    }
+
     // //////////////////////////////////////////////////////////////////////////
     // Fields
     // //////////////////////////////////////////////////////////////////////////
+
 
     /**
      * Sorts by root file name, ignoring path and file extension

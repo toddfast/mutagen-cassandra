@@ -53,7 +53,8 @@ public abstract class AbstractTest {
                         + keyspace + "' ;");
 
         // drop all tables
-        for (Row r : rs.all()){
+        while (!rs.isExhausted()) {
+            Row r = rs.one();
             String tablename = r.getString("columnfamily_name");
             session.execute("DROP TABLE \"" + tablename + "\";");
         }

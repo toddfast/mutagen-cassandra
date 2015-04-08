@@ -28,4 +28,11 @@ public interface CassandraMutagen {
      *         the result of migration of all the scripts.
      */
     public Plan.Result<String> mutate(Session session);
+
+    /**
+     * @param session
+     *            the session to execute cql statements, just one instance in the application.
+     * 
+     */
+    public void baseline(Session session, String lastCompletedState);
 }

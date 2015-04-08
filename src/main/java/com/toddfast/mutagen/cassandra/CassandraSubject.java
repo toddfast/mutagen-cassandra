@@ -52,8 +52,8 @@ public class CassandraSubject implements Subject<String> {
      * 
      */
     public void createSchemaVersionTable() {
-        // createstatement
-        String createStatement = "CREATE TABLE \"" +
+        // Create table if it doesn't exist
+        String createStatement = "CREATE TABLE IF NOT EXISTS \"" +
                 versionSchemaTable +
                 "\"( versionid varchar, filename varchar,checksum varchar,"
                 + "execution_date timestamp,execution_time int,"
@@ -96,7 +96,7 @@ public class CassandraSubject implements Subject<String> {
      * @return true if versionId is in the database
      */
     public boolean isVersionIdPresent(String versionId) {
-        return !getVersionRecordByVersionId(versionId).all().isEmpty();
+        return !getVersionRecordByVersionId(versionId).isExhausted();
     }
 
     public boolean isMutationFailed(String versionId) {
@@ -148,11 +148,10 @@ public class CassandraSubject implements Subject<String> {
 
             }
 
-            List<Row> rows = results.all();
-
-            for (Row r1 : rows) {
-                String versionid = r1.getString("versionid");
-                if (r1.getBool("success") == true && version.compareTo(versionid) < 0)
+            while (!results.isExhausted()) {
+                Row r = results.one();
+                String versionid = r.getString("versionid");
+                if (r.getBool("success") == true && version.compareTo(versionid) < 0)
                     version = versionid;
             }
         }
@@ -163,7 +162,7 @@ public class CassandraSubject implements Subject<String> {
     private void printTable() {
         ResultSet results = null;
         results = getVersionRecord();
-        
+
         List<Row> rows = results.all();
         for (Row r : rows) {
             System.out.println(r.toString());

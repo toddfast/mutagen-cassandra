@@ -268,6 +268,16 @@ public abstract class AbstractCassandraMutation implements Mutation<String> {
         return hexString.toString();
     }
     
+    public void dummyExecution() {
+        String version = getResultingState().getID();
+
+        // caculate the checksum
+        String checksum = getChecksum();
+
+        // append version record
+        appendVersionRecord(version, getResourceName(), checksum, 0, true);
+    }
+    
     // //////////////////////////////////////////////////////////////////////////
     // Fields
     // //////////////////////////////////////////////////////////////////////////

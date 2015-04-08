@@ -29,14 +29,17 @@ public class Launcher {
 
         Session session = launchConnection();
 
-        // Perform mutations
-        performMutations(session, RESOURCE_PATH);
-
         // Clean
-        // clean(session);
+        clean(session);
 
         // Repair
         // repair(session);
+
+        // Baseline
+        // baseline(session, RESOURCE_PATH, "201502011225");
+
+        // Perform mutations
+        performMutations(session, RESOURCE_PATH);
 
         // close session and cluster
         if (session != null) {
@@ -56,7 +59,7 @@ public class Launcher {
 
         // print summary
         printMutationResult(result);
-        
+
         return result;
     }
 
@@ -68,7 +71,7 @@ public class Launcher {
 
     public static void clean(Session session) {
         System.out.println("Cleaning...");
-        //TRUNCATE instead of drop ?
+        // TRUNCATE instead of drop ?
         session.execute("DROP TABLE IF EXISTS \"Version\";");
         System.out.println("Done");
     }
@@ -77,17 +80,32 @@ public class Launcher {
         System.out.println("Repairing...");
         ResultSet rs = session.execute("SELECT * FROM \"Version\";");
         List<Row> selectedRows = new ArrayList<Row>();
-        for (Row r : rs.all()) {
+
+        while (!rs.isExhausted()) {
+            Row r = rs.one();
             if (!r.getBool("success"))
                 selectedRows.add(r);
         }
-
+        rs.all();
         System.out.println(selectedRows.size() + " database entrie(s) have been selected for deletion : ");
         for (Row r : selectedRows) {
             System.out.println(" - " + r.toString());
             session.execute("DELETE FROM \"Version\" WHERE versionid = '" + r.getString("versionid") + "';");
         }
         System.out.println("Done");
+
+    }
+
+    public static void baseline(Session session, String resourcePath, String lastCompletedState) throws IOException {
+
+        System.out.println("Baseline...");
+        CassandraMutagen mutagen = initialiseMutagen(resourcePath);
+
+        mutagen.baseline(session, lastCompletedState);
+
+        System.out.println("Done");
+
+        // TODO nice output
 
     }
 
