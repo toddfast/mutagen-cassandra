@@ -20,6 +20,8 @@ import com.toddfast.mutagen.cassandra.AbstractCassandraMutation;
 import com.toddfast.mutagen.cassandra.CassandraCoordinator;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.CassandraSubject;
+import com.toddfast.mutagen.cassandra.impl.info.MigrationInfoService;
+import com.toddfast.mutagen.cassandra.impl.info.MigrationInfoServiceImpl;
 
 /**
  * An implementation for cassandraMutagen.
@@ -145,6 +147,17 @@ public class CassandraMutagenImpl implements CassandraMutagen {
         }
         System.out.println("Done");
 
+    }
+
+    /**
+     * Retrives the complete information about all the migrations.
+     * 
+     * @param session
+     *            - the session to execute the cql.
+     * @return instance of MigrationInfoService.
+     */
+    public MigrationInfoService info(Session session) {
+        return new MigrationInfoServiceImpl(session);
     }
 
     // //////////////////////////////////////////////////////////////////////////

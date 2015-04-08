@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Plan;
+import com.toddfast.mutagen.cassandra.impl.info.MigrationInfoService;
 
 /**
  * An interface that runs the cassandra migration tasks.
@@ -49,4 +50,15 @@ public interface CassandraMutagen {
      * 
      */
     public void repair(Session session);
+
+    /**
+     * Retrive the complete information about all the migrations.
+     * 
+     * @param session
+     *            - the session to execute cql.
+     * @return instance of MigrationInfoService.
+     * 
+     */
+    public MigrationInfoService info(Session session);
+
 }

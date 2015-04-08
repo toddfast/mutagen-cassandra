@@ -60,6 +60,7 @@ public abstract class AbstractTest {
         }
     }
 
+
     /**
      * Get an instance of cassandra mutagen and mutate the mutations.
      * 
@@ -71,14 +72,12 @@ public abstract class AbstractTest {
 
         // Get an instance of CassandraMutagen
         CassandraMutagen mutagen = new CassandraMutagenImpl();
-
         // Initialize the list of mutations
         try {
             mutagen.initialize(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         // Mutate!
         result = mutagen.mutate(session);
     }
