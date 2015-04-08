@@ -3,10 +3,14 @@ package com.toddfast.mutagen.cassandra.impl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ProtocolVersion;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.Plan.Result;
@@ -19,28 +23,71 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 public class Launcher {
 
     // Look for mutation scripts in the following folder
-    private static final String RESSOURCE_PATH = "com/toddfast/mutagen/cassandra/mutations";
+    private static final String RESOURCE_PATH = "com/toddfast/mutagen/cassandra/mutations";
 
     public static void main(String[] args) throws IOException {
 
-            Session session = launchConnection();
-            // Perform mutations
-            CassandraMutagen mutagen = new CassandraMutagenImpl();
-            mutagen.initialize(RESSOURCE_PATH);
-            Result<String> result = mutagen.mutate(session);
+        Session session = launchConnection();
 
-            // print summary
-            printMutationResult(result);
+        // Perform mutations
+        performMutations(session, RESOURCE_PATH);
 
-     
-            // close session and cluster
+        // Clean
+        // clean(session);
+
+        // Repair
+        // repair(session);
+
+        // close session and cluster
         if (session != null) {
             session.close();
             session.getCluster().close();
         }
 
-           
+    }
 
+    /*
+     * Execute mutations
+     */
+    public static Result<String> performMutations(Session session, String resourcePath) throws IOException {
+
+        CassandraMutagen mutagen = initialiseMutagen(resourcePath);
+        Result<String> result = mutagen.mutate(session);
+
+        // print summary
+        printMutationResult(result);
+        
+        return result;
+    }
+
+    public static CassandraMutagen initialiseMutagen(String resourcePath) throws IOException {
+        CassandraMutagen mutagen = new CassandraMutagenImpl();
+        mutagen.initialize(resourcePath);
+        return mutagen;
+    }
+
+    public static void clean(Session session) {
+        System.out.println("Cleaning...");
+        //TRUNCATE instead of drop ?
+        session.execute("DROP TABLE IF EXISTS \"Version\";");
+        System.out.println("Done");
+    }
+
+    public static void repair(Session session) {
+        System.out.println("Repairing...");
+        ResultSet rs = session.execute("SELECT * FROM \"Version\";");
+        List<Row> selectedRows = new ArrayList<Row>();
+        for (Row r : rs.all()) {
+            if (!r.getBool("success"))
+                selectedRows.add(r);
+        }
+
+        System.out.println(selectedRows.size() + " database entrie(s) have been selected for deletion : ");
+        for (Row r : selectedRows) {
+            System.out.println(" - " + r.toString());
+            session.execute("DELETE FROM \"Version\" WHERE versionid = '" + r.getString("versionid") + "';");
+        }
+        System.out.println("Done");
 
     }
 
@@ -73,7 +120,7 @@ public class Launcher {
         }
         System.out.println("Last state: " + (state != null ? state.getID() : "null"));
     }
-    
+
     public static Session launchConnection() {
         // Launch arguments
         String propertiesFilePath = null;
