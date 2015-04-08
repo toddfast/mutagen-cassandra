@@ -59,6 +59,7 @@ public abstract class AbstractTest {
             session.execute("DROP TABLE \"" + tablename + "\";");
         }
     }
+
     /**
      * Get an instance of cassandra mutagen and mutate the mutations.
      * 
@@ -108,6 +109,7 @@ public abstract class AbstractTest {
     protected void checkLastTimestamp(String expectedTimestamp) {
         assertEquals(expectedTimestamp, result.getLastState().getID());
     }
+
     // STATEMENTS
 
     /**
@@ -151,7 +153,6 @@ public abstract class AbstractTest {
         session.execute(createStatement);
     }
 
-
     /**
      * add record in the version table.
      * 
@@ -183,8 +184,31 @@ public abstract class AbstractTest {
                 ));
     }
 
+    public String queryDatabaseForLastState() {
+        ResultSet rs = getSession().execute("SELECT versionid FROM \"Version\";");
+
+        String version = "000000000000";
+
+        while (!rs.isExhausted()) {
+            Row r = rs.one();
+            String versionid = r.getString("versionid");
+            if (version.compareTo(versionid) < 0)
+                version = versionid;
+        }
+
+        return version;
+
+    }
+
     public Plan.Result<String> getResult() {
         return result;
+    }
+
+    /**
+     * @return the session
+     */
+    public static Session getSession() {
+        return session;
     }
 
 }

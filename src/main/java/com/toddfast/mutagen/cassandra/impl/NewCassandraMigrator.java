@@ -49,6 +49,7 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
     public NewCassandraMigrator() {
         this(null);
     }
+
     /**
      * Run the migration script with given program arguments. <br>
      * Run with <code>-h</code> argument to display help. <br>
@@ -257,12 +258,12 @@ public abstract class NewCassandraMigrator extends AbstractCassandraMutation {
         return getSession().execute(boundStatement);
     }
 
-
     @Override
     // return class name (with package hierarchy) and replace semicolons by "/" for correct version parsing
     // if using semicolons package names ending with integers will be confused with mutation state
     protected String getResourceName() {
-        return getClass().getName().replace(".", "/");
+        String name = getClass().getName();
+        return name.substring(name.lastIndexOf(".") + 1) + ".java";
     }
 
     @Override

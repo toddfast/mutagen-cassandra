@@ -30,7 +30,7 @@ public class Launcher {
         Session session = launchConnection();
 
         // Clean
-        clean(session);
+        // clean(session);
 
         // Repair
         // repair(session);

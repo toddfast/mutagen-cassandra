@@ -1,0 +1,8 @@
+-- Mutation with error to make sure the base line never executes it
+
+create tablazeazeaze "Test1" (
+	key varchar PRIMARY KEY,
+	value1 varchar
+);
+
+insert into "Test1" (key, value1) values ('row1', 'value1');
