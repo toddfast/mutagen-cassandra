@@ -1,285 +1,295 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.MutationBatch;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.util.Date;
+
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.MutagenException;
 import com.toddfast.mutagen.Mutation;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.basic.SimpleState;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
- *
- * @author Todd Fast
+ * Base class for cassandra mutation.
+ * An {@link Mutation} implementation for cassandra.
+ * Represents a single change that can be made to a resource,identified
+ * unambiguously by a state.
+ * 
  */
-public abstract class AbstractCassandraMutation implements Mutation<Integer> {
+public abstract class AbstractCassandraMutation implements Mutation<String> {
+    /**
+     * Constructor for AbstractCassandraMutation.
+     * 
+     * @param session
+     *            the session to execute cql statement
+     */
+    public AbstractCassandraMutation(Session session) {
 
-	/**
-	 *
-	 *
-	 */
-	protected AbstractCassandraMutation(Keyspace keyspace) {
-		super();
-		this.keyspace=keyspace;
-	}
+        this.session = session;
+        this.state = null;
+    }
 
+    /**
+     * Get the string of mutation state.
+     * 
+     * @return string representing the mutation state.
+     */
+    @Override
+    public String toString() {
+        if (getResultingState() != null) {
+            return getResourceName() + "[state=" + getResultingState().getID() + "]";
+        }
+        else {
+            return getResourceName();
+        }
+    }
 
-	/**
-	 *
-	 *
-	 */
-	@Override
-	public String toString() {
-		if (getResultingState()!=null) {
-			return super.toString()+"[state="+getResultingState().getID()+"]";
-		}
-		else {
-			return super.toString();
-		}
-	}
+    /**
+     * Returns the state of a resource.
+     * The state represents the datetime of the resource with the name convention:<br>
+     * M<DATETIME>_<Camel case title>_<ISSUE>.cqlsh.txt<br>
+     * M<DATETIME>_<Camel case title>_<ISSUE>.java<br>
+     * 
+     * @param resourceName
+     *            the name of resource.
+     * @return
+     *         the state of a resource.
+     */
+    protected final State<String> parseVersion(String resourceName) {
+        String versionString = resourceName;
+        int index = versionString.lastIndexOf(fileSeparator);
+        if (versionString.lastIndexOf(fileSeparator) != -1) {
+            versionString = versionString.substring(index + 1);
+        }
 
+        index = versionString.lastIndexOf(cqlMigrationSeparator);
+        if (index != -1) {
+            versionString = versionString.substring(0, index);
+        }
 
-	/**
-	 *
-	 *
-	 */
-	protected final State<Integer> parseVersion(String resourceName) {
-		String versionString=resourceName;
-		int index=versionString.lastIndexOf("/");
-		if (index!=-1) {
-			versionString=versionString.substring(index+1);
-		}
+        StringBuilder buffer = new StringBuilder();
+        for (Character c : versionString.toCharArray()) {
+            // Skip all initial non-digit characters
+            if (!Character.isDigit(c)) {
+                if (buffer.length() == 0) {
+                    continue;
+                }
+                else {
+                    // End when we reach the first non-digit
+                    break;
+                }
+            }
+            else {
+                buffer.append(c);
+            }
+        }
 
-		index=versionString.lastIndexOf(".");
-		if (index!=-1) {
-			versionString=versionString.substring(0,index);
-		}
+        return new SimpleState<String>(buffer.toString());
+    }
 
-		StringBuilder buffer=new StringBuilder();
-		for (Character c: versionString.toCharArray()) {
-			// Skip all initial non-digit characters
-			if (!Character.isDigit(c)) {
-				if (buffer.length()==0) {
-					continue;
-				}
-				else {
-					// End when we reach the first non-digit
-					break;
-				}
-			}
-			else {
-				buffer.append(c);
-			}
-		}
+    /**
+     * A getter method for session.
+     * 
+     * @return
+     */
+    protected Session getSession() {
+        return session;
+    }
 
-		return new SimpleState<Integer>(Integer.parseInt(buffer.toString()));
-	}
+    public void setSession(Session session) {
+        this.session = session;
+    }
+    /**
+     * Override to perform the actual mutation.
+     * 
+     * @param context
+     *            Logs to {@link System.out} and {@link System.err}
+     */
+    protected abstract void performMutation(Context context);
 
+    /**
+     * Get the state after mutation.
+     * 
+     * @return state
+     */
+    @Override
+    public State<String> getResultingState() {
+        if (state != null)
+            return state;
+        else
+            return state = parseVersion(getResourceName());
+    }
 
-	/**
-	 *
-	 *
-	 */
-	protected Keyspace getKeyspace() {
-		return keyspace;
-	}
+    /**
+     * Override to get the name of resource.
+     * 
+     * @return
+     */
+    protected abstract String getResourceName();
 
+    /**
+     * append the version record in the table Version.
+     * 
+     * @param version
+     *            Id of version record,usually represented by the datetime.
+     * @param filename
+     *            name of script file that was executed.
+     * @param checksum
+     *            checksum for validation.
+     * @param execution_time
+     *            The execution time(ms) for this script file.
+     * @param success
+     *            represents if this execution successes.
+     */
+    protected void appendVersionRecord(String version, String filename, String checksum, int execution_time,
+            boolean success) {
+        // insert statement for version record
+        String insertStatement = "INSERT INTO \"" + versionSchemaTable + "\" (versionid,filename,checksum,"
+                + "execution_date,execution_time,success) "
+                + "VALUES (?,?,?,?,?,?);";
+        // prepare statement
+        PreparedStatement preparedInsertStatement = session.prepare(insertStatement);
+        session.execute(preparedInsertStatement.bind(version,
+                filename,
+                checksum,
+                new Timestamp(new Date().getTime()),
+                execution_time,
+                success
+                ));
+    }
 
-	/**
-	 * Perform the actual mutation
-	 *
-	 */
-	protected abstract void performMutation(Context context);
+    /**
+     * Performs the actual mutation and then updates the recorded schema version.
+     * 
+     */
+    @Override
+    public final void mutate(Context context)
+            throws MutagenException {
 
-
-	/**
-	 *
-	 *
-	 */
-	@Override
-	public abstract State<Integer> getResultingState();
-
-
-	/**
-	 * Return a canonical representative of the change in string form
-	 *
-	 */
-	protected abstract String getChangeSummary();
-
-
-	/**
-	 * Performs the actual mutation and then updates the recorded schema version
-	 *
-	 */
-	@Override
-	public final void mutate(Context context)
-			throws MutagenException {
-
-		// Perform the mutation
-		performMutation(context);
-
-		int version=getResultingState().getID();
-
-		String change=getChangeSummary();
-		if (change==null) {
-			change="";
-		}
-
-		String changeHash=md5String(change);
-
-		// The straightforward way, without locking
-		try {
-			MutationBatch batch=getKeyspace().prepareMutationBatch();
-			batch
-				.withRow(CassandraSubject.VERSION_CF,
-					CassandraSubject.ROW_KEY)
-				.putColumn(CassandraSubject.VERSION_COLUMN,version);
-
-			batch
-				.withRow(CassandraSubject.VERSION_CF,
-					String.format("%08d",version))
-				.putColumn("change",change)
-				.putColumn("hash",changeHash);
-
-			batch.execute();
-		}
-		catch (ConnectionException e) {
-			throw new MutagenException("Could not update \"schema_version\" "+
-				"column family to state "+version+
-				"; schema is now out of sync with recorded version",e);
-		}
-
-// TAF: Why does this fail with a StaleLockException? Do we need to use a
-// separate lock table?
-
-//		// Attempt to acquire a lock to update the version
-//		ColumnPrefixDistributedRowLock<String> lock =
-//			new ColumnPrefixDistributedRowLock<String>(getKeyspace(),
-//					CassandraSubject.VERSION_CF,CassandraSubject.VERSION_COLUMN)
-//				.withBackoff(new BoundedExponentialBackoff(250, 10000, 10))
-//				.expireLockAfter(1, TimeUnit.SECONDS)
-////				.failOnStaleLock(false);
-//				.failOnStaleLock(true);
-//
-//		try {
-//			lock.acquire();
-//		}
-//		catch (StaleLockException e) {
-//			// Won't happen
-//			throw new MutagenException("Could not update "+
-//				"\"schema_version\" column family to state "+version+
-//				" because lock expired",e);
-//		}
-//		catch (BusyLockException e) {
-//			throw new MutagenException("Could not update "+
-//				"\"schema_version\" column family to state "+version+
-//				" because another client is updating the recorded version",e);
-//		}
-//		catch (Exception e) {
-//			if (e instanceof RuntimeException) {
-//				throw (RuntimeException)e;
-//			}
-//			else {
-//				throw new MutagenException("Could not update "+
-//					"\"schema_version\" column family to state "+version+
-//					" because a write lock could not be obtained",e);
-//			}
-//		}
-//		finally {
-//			try {
-//				MutationBatch batch=getKeyspace().prepareMutationBatch();
-//				batch.withRow(CassandraSubject.VERSION_CF,
-//						CassandraSubject.ROW_KEY)
-//					.putColumn(CassandraSubject.VERSION_COLUMN,version);
-//
-//				// Release and update
-//				lock.releaseWithMutation(batch);
-//			}
-//			catch (Exception e) {
-//				if (e instanceof RuntimeException) {
-//					throw (RuntimeException)e;
-//				}
-//				else {
-//					throw new MutagenException("Could not update "+
-//						"\"schema_version\" column family to state "+version+
-//						"; schema is now out of sync with recorded version",e);
-//				}
-//			}
-//		}
-	}
+        MutagenException runtimeException = null;
+        // Perform the mutation
+        boolean success = true;
+        long startTime = System.currentTimeMillis();
+        try {
+            performMutation(context);
+        } catch (MutagenException e) {
+            success = false;
+            runtimeException = e;
+        }
 
 
-	/**
-	 *
-	 *
-	 * @param key
-	 * @return
-	 */
-	public static byte[] md5(String key) {
-		MessageDigest algorithm;
-		try {
-			algorithm=MessageDigest.getInstance("MD5");
-		}
-		catch (NoSuchAlgorithmException ex) {
-			throw new RuntimeException(ex);
-		}
+        long endTime = System.currentTimeMillis();
+        long execution_time = endTime - startTime;
 
-		algorithm.reset();
+        String version = getResultingState().getID();
 
-		try {
-			algorithm.update(key.getBytes("UTF-8"));
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new RuntimeException(ex);
-		}
+        // caculate the checksum
+        String checksum = getChecksum();
 
-		byte[] messageDigest=algorithm.digest();
-		return messageDigest;
-	}
+        // append version record
+        appendVersionRecord(version, getResourceName(), checksum, (int) execution_time, success);
 
+        if (runtimeException != null)
+            throw runtimeException;
 
-	/**
-	 *
-	 *
-	 * @param key
-	 * @return
-	 */
-	public static String md5String(String key) {
-		byte[] messageDigest=md5(key);
-		return toHex(messageDigest);
-	}
+    }
 
+    /**
+     * 
+     * @return the MD5 hash of the current mutation
+     */
+    public abstract String getChecksum();
 
-	/**
-	 * Encode a byte array as a hexadecimal string
-	 *
-	 * @param	bytes
-	 * @return
-	 */
-	public static String toHex(byte[] bytes) {
-		StringBuilder hexString=new StringBuilder();
-		for (int i=0; i<bytes.length; i++) {
+    /**
+     * Generate the MD5 hash for a key.
+     * 
+     * @param key
+     *            the string to be hashed.
+     * @return
+     *         the MD5 hash for the key.
+     */
+    public static byte[] md5(String key) {
+        MessageDigest algorithm;
+        try {
+            algorithm = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
 
-			String hex=Integer.toHexString(0xFF & bytes[i]);
-			if (hex.length() == 1) {
-				hexString.append('0');
-			}
+        algorithm.reset();
 
-			hexString.append(hex);
-		}
+        try {
+            algorithm.update(key.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
 
-		return hexString.toString();
-	}
+        byte[] messageDigest = algorithm.digest();
+        return messageDigest;
+    }
 
+    /**
+     * change the hash of a key into hexadecimal format
+     * 
+     * @param key
+     *            the string to be hashed.
+     * @return
+     *         the hexadecimal format of hash of a key.
+     */
+    public static String md5String(String key) {
+        byte[] messageDigest = md5(key);
+        return toHex(messageDigest);
+    }
 
+    /**
+     * Encode a byte array as a hexadecimal string
+     * 
+     * @param bytes
+     *            byte array
+     * @return
+     *         hexadecimal format for the byte array
+     */
+    public static String toHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
 
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
 
-	////////////////////////////////////////////////////////////////////////////
-	// Fields
-	////////////////////////////////////////////////////////////////////////////
+            hexString.append(hex);
+        }
 
-	private Keyspace keyspace;
+        return hexString.toString();
+    }
+    
+    public void dummyExecution() {
+        String version = getResultingState().getID();
+
+        // caculate the checksum
+        String checksum = getChecksum();
+
+        // append version record
+        appendVersionRecord(version, getResourceName(), checksum, 0, true);
+    }
+    
+    // //////////////////////////////////////////////////////////////////////////
+    // Fields
+    // //////////////////////////////////////////////////////////////////////////
+
+    private String fileSeparator = "/"; // file separator
+
+    private String cqlMigrationSeparator = "_"; // script separator
+
+    private Session session; // session
+
+    private String versionSchemaTable = "Version"; // version table name
+
+    private State<String> state;
+
 }

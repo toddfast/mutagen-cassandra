@@ -1,66 +1,64 @@
 package com.toddfast.mutagen.cassandra;
 
-import com.netflix.astyanax.Keyspace;
-import com.netflix.astyanax.model.ColumnFamily;
-import com.netflix.astyanax.serializers.StringSerializer;
+import com.datastax.driver.core.Session;
 import com.toddfast.mutagen.Coordinator;
 import com.toddfast.mutagen.State;
 import com.toddfast.mutagen.Subject;
 
 /**
- *
- *
- * @author Todd Fast
+ * An implementation of {@link Coordinator} that accepts all states
+ * Whose timestamp is greater than the current database timestamp.
+ * It acts as a filter.
+ * 
  */
-public class CassandraCoordinator implements Coordinator<Integer> {
+public class CassandraCoordinator implements Coordinator<String> {
 
-	/**
-	 * 
-	 * 
-	 */
-	public CassandraCoordinator(Keyspace keyspace) {
-		super();
-		if (keyspace==null) {
-			throw new IllegalArgumentException(
-				"Parameter \"keyspace\" cannot be null");
-		}
+    /**
+     * Constructor for cassandra coordinator.
+     * 
+     * @param session
+     *            the session to execute cql statements
+     */
+    public CassandraCoordinator(Session session) {
+        super();
+        if (session == null) {
+            throw new IllegalArgumentException(
+                    "Parameter \"session\" cannot be null");
+        }
 
-		this.keyspace=keyspace;
-	}
+        this.session = session;
+    }
 
+    /**
+     * A getter method to get session.
+     * 
+     * @return session
+     */
+    public Session getSession() {
+        return session;
+    }
 
-	/**
-	 *
-	 *
-	 */
-	public Keyspace getKeyspace() {
-		return keyspace;
-	}
+    /**
+     * Return if the timestamp of state is greater than the current database timestamp.
+     * 
+     * @return
+     *         true or false
+     */
+    @Override
+    public boolean accept(Subject<String> subject,
+            State<String> targetState) {
 
+        State<String> currentState = subject.getCurrentState();
 
-	/**
-	 * 
-	 * 
-	 */
-	@Override
-	public boolean accept(Subject<Integer> subject,
-			State<Integer> targetState) {
-		State<Integer> currentState=subject.getCurrentState();
-		return targetState.getID() > currentState.getID();
-	}
+        // accept if the target state is superior to the current one.
+        return targetState.getID().compareTo(currentState.getID()) > 0;
 
+    }
 
+    // //////////////////////////////////////////////////////////////////////////
+    // Fields
+    // //////////////////////////////////////////////////////////////////////////
 
+    private Session session; // session
 
-	////////////////////////////////////////////////////////////////////////////
-	// Fields
-	////////////////////////////////////////////////////////////////////////////
-
-	public static final ColumnFamily<String,String> VERSION_CF=
-		ColumnFamily.newColumnFamily(
-			"schema_version",
-			StringSerializer.get(),
-			StringSerializer.get());
-
-	private Keyspace keyspace;
 }

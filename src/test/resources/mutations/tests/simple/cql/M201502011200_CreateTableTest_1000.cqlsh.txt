@@ -1,0 +1,13 @@
+/*
+* This is a simple cql script for test.
+* First we create a table Test1 and insert a tuple in this table.
+*/
+
+//create a table Test1
+create table "Test1" (
+	key varchar PRIMARY KEY,
+	value1 varchar
+);
+
+//insert a tuple('row1','value1') in the Test1
+insert into "Test1" (key, value1) values ('row1', 'value1');

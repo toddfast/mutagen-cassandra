@@ -1,0 +1,4 @@
+// Second script, failure
+// this is a cql script file with wrong cql statements.
+
+create table "Test"();
